@@ -1,22 +1,16 @@
+use super::{register, EventLoopWindowTarget, OsError};
 use dpi::{LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize};
 use error::{ExternalError, NotSupportedError, OsError as RootOE};
 use event::{Event, WindowEvent};
 use icon::Icon;
+use monitor::MonitorHandle as RootMH;
 use platform::stdweb::WindowExtStdweb;
-use monitor::{MonitorHandle as RootMH};
-use window::{CursorIcon, Window as RootWindow, WindowAttributes, WindowId as RootWI};
-use super::{EventLoopWindowTarget, OsError, register};
-use std::collections::VecDeque;
-use std::collections::vec_deque::IntoIter as VecDequeIter;
 use std::cell::RefCell;
-use stdweb::{
-    traits::*,
-    unstable::TryInto
-};
-use stdweb::web::{
-    document, window,
-    html_element::CanvasElement,
-};
+use std::collections::vec_deque::IntoIter as VecDequeIter;
+use std::collections::VecDeque;
+use stdweb::web::{document, html_element::CanvasElement, window};
+use stdweb::{traits::*, unstable::TryInto};
+use window::{CursorIcon, Window as RootWindow, WindowAttributes, WindowId as RootWI};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MonitorHandle;
@@ -59,14 +53,19 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new<T>(target: &EventLoopWindowTarget<T>, attr: WindowAttributes,
-                  _: PlatformSpecificWindowBuilderAttributes) -> Result<Self, RootOE> {
+    pub fn new<T>(
+        target: &EventLoopWindowTarget<T>,
+        attr: WindowAttributes,
+        _: PlatformSpecificWindowBuilderAttributes,
+    ) -> Result<Self, RootOE> {
         let element = document()
             .create_element("canvas")
             .map_err(|_| os_error!(OsError("Failed to create canvas element".to_owned())))?;
-        let canvas: CanvasElement = element.try_into()
+        let canvas: CanvasElement = element
+            .try_into()
             .map_err(|_| os_error!(OsError("Failed to create canvas element".to_owned())))?;
-        document().body()
+        document()
+            .body()
             .ok_or_else(|| os_error!(OsError("Failed to find body node".to_owned())))?
             .append_child(&canvas);
 
@@ -75,20 +74,19 @@ impl Window {
         let runner = target.runner.clone();
         let redraw = Box::new(move || {
             let runner = runner.clone();
-            window().request_animation_frame(move |_| runner.send_event(Event::WindowEvent {
-                window_id: RootWI(WindowId),
-                event: WindowEvent::RedrawRequested
-            }));
+            window().request_animation_frame(move |_| {
+                runner.send_event(Event::WindowEvent {
+                    window_id: RootWI(WindowId),
+                    event: WindowEvent::RedrawRequested,
+                })
+            });
         });
 
         let window = Window {
             canvas,
             redraw,
             previous_pointer: RefCell::new("auto"),
-            position: RefCell::new(LogicalPosition {
-                x: 0.0,
-                y: 0.0
-            })
+            position: RefCell::new(LogicalPosition { x: 0.0, y: 0.0 }),
         };
 
         if let Some(inner_size) = attr.inner_size {
@@ -139,11 +137,14 @@ impl Window {
 
     pub fn set_outer_position(&self, position: LogicalPosition) {
         *self.position.borrow_mut() = position;
-        self.canvas.set_attribute("position", "fixed")
+        self.canvas
+            .set_attribute("position", "fixed")
             .expect("Setting the position for the canvas");
-        self.canvas.set_attribute("left", &position.x.to_string())
+        self.canvas
+            .set_attribute("left", &position.x.to_string())
             .expect("Setting the position for the canvas");
-        self.canvas.set_attribute("top", &position.y.to_string())
+        self.canvas
+            .set_attribute("top", &position.y.to_string())
             .expect("Setting the position for the canvas");
     }
 
@@ -151,7 +152,7 @@ impl Window {
     pub fn inner_size(&self) -> LogicalSize {
         LogicalSize {
             width: self.canvas.width() as f64,
-            height: self.canvas.height() as f64
+            height: self.canvas.height() as f64,
         }
     }
 
@@ -159,7 +160,7 @@ impl Window {
     pub fn outer_size(&self) -> LogicalSize {
         LogicalSize {
             width: self.canvas.width() as f64,
-            height: self.canvas.height() as f64
+            height: self.canvas.height() as f64,
         }
     }
 
@@ -231,7 +232,8 @@ impl Window {
             CursorIcon::RowResize => "row-resize",
         };
         *self.previous_pointer.borrow_mut() = text;
-        self.canvas.set_attribute("cursor", text)
+        self.canvas
+            .set_attribute("cursor", text)
             .expect("Setting the cursor on the canvas");
     }
 
@@ -250,10 +252,12 @@ impl Window {
     #[inline]
     pub fn set_cursor_visible(&self, visible: bool) {
         if !visible {
-            self.canvas.set_attribute("cursor", "none")
+            self.canvas
+                .set_attribute("cursor", "none")
                 .expect("Setting the cursor on the canvas");
         } else {
-            self.canvas.set_attribute("cursor", *self.previous_pointer.borrow())
+            self.canvas
+                .set_attribute("cursor", *self.previous_pointer.borrow())
                 .expect("Setting the cursor on the canvas");
         }
     }
@@ -297,7 +301,7 @@ impl Window {
     #[inline]
     pub fn current_monitor(&self) -> RootMH {
         RootMH {
-            inner: MonitorHandle
+            inner: MonitorHandle,
         }
     }
 
