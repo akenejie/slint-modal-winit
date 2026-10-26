@@ -9,7 +9,7 @@ mod client_msg;
 pub mod cookie;
 mod cursor;
 mod geometry;
-mod hint;
+pub(crate) mod hint;
 mod icon;
 mod input;
 pub mod keys;

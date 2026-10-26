@@ -31,6 +31,7 @@ use crate::window::{
     WindowButtons, WindowLevel,
 };
 
+use super::util::hint;
 use super::util::{self, SelectedCursor};
 use super::{
     ffi, ActiveEventLoop, CookieResultExt, ImeRequest, ImeSender, VoidCookie, WindowId, XConnection,
@@ -1039,6 +1040,11 @@ impl UnownedWindow {
         let mut hints = self.xconn.get_motif_hints(self.xwindow);
 
         hints.set_decorations(decorations);
+        // 枠ありでもサイズ変更不可なら、タイトルバーの最小化 / 最大化ボタンを
+        // 落とす (設定ダイアログ)。可変なら全ボタンを残す。
+        if decorations && !self.shared_state_lock().is_resizable {
+            hints.set_buttons(hint::mwm_decor_without_min_max());
+        }
 
         self.xconn.set_motif_hints(self.xwindow, &hints)
     }
@@ -1080,6 +1086,55 @@ impl UnownedWindow {
         self.set_window_level_inner(level)
             .expect_then_ignore_error("Failed to set window-level state");
         self.xconn.flush_requests().expect("Failed to set window-level state");
+    }
+
+    // このウィンドウの X11 ウィンドウ ID。transient の親指定などに使う。
+    #[inline]
+    pub fn x11_window_id(&self) -> u32 {
+        self.xwindow
+    }
+
+    // ICCCM の WM_TRANSIENT_FOR を設定する。親ウィンドウ (所有者) を指定すると、
+    // ウィンドウ マネージャが「親より前面に留める・タスクバーに出さない」等の
+    // ダイアログ扱いをする。None で解除。
+    fn set_transient_for_inner(
+        &self,
+        parent: Option<xproto::Window>,
+    ) -> Result<VoidCookie<'_>, X11Error> {
+        let atoms = self.xconn.atoms();
+        match parent {
+            Some(value) => self.xconn.change_property(
+                self.xwindow,
+                atoms[WM_TRANSIENT_FOR],
+                xproto::AtomEnum::WINDOW.into(),
+                xproto::PropMode::REPLACE,
+                &[value],
+            ),
+            None => Ok(self
+                .xconn
+                .xcb_connection()
+                .delete_property(self.xwindow, atoms[WM_TRANSIENT_FOR])?),
+        }
+    }
+
+    #[inline]
+    pub fn set_transient_for(&self, parent: Option<xproto::Window>) {
+        self.set_transient_for_inner(parent)
+            .expect_then_ignore_error("Failed to set WM_TRANSIENT_FOR");
+        self.xconn.flush_requests().expect("Failed to set WM_TRANSIENT_FOR");
+    }
+
+    // ICCCM/EWMH のモーダル状態。_NET_WM_STATE_MODAL を付与する。対応した
+    // ウィンドウ マネージャはダイアログをモーダルとして扱う。
+    fn set_modal_inner(&self, modal: bool) -> Result<VoidCookie<'_>, X11Error> {
+        self.toggle_atom(_NET_WM_STATE_MODAL, modal)
+    }
+
+    #[inline]
+    pub fn set_modal(&self, modal: bool) {
+        self.set_modal_inner(modal)
+            .expect_then_ignore_error("Failed to set _NET_WM_STATE_MODAL");
+        self.xconn.flush_requests().expect("Failed to set _NET_WM_STATE_MODAL");
     }
 
     fn set_icon_inner(&self, icon: PlatformIcon) -> Result<VoidCookie<'_>, X11Error> {
@@ -1423,6 +1478,23 @@ impl UnownedWindow {
 
         self.set_maximizable_inner(resizable)
             .expect_then_ignore_error("Failed to call `XSetWMNormalHints`");
+
+        // サイズ変更不可のウィンドウ (設定ダイアログ) はタイトルバーの
+        // 最小化 / 最大化ボタンも落とす。枠 (ボーダー / タイトル) は残す。
+        // 可変なら全ボタン付きに戻す。枠ありのときだけ触る (枠なし指定を
+        // 上書きしない)。
+        if self.is_decorated() {
+            let mut hints = self.xconn.get_motif_hints(self.xwindow);
+            if resizable {
+                hints.set_decor_mask(hint::mwm::MWM_DECOR_EVERYTHING);
+            } else {
+                hints.set_buttons(hint::mwm_decor_without_min_max());
+            }
+            self.xconn
+                .set_motif_hints(self.xwindow, &hints)
+                .expect_then_ignore_error("Failed to set motif hints");
+            self.xconn.flush_requests().expect("Failed to set motif hints");
+        }
 
         let scale_factor = self.scale_factor();
         let min_inner_size = min_size.map(|size| cast_size_to_hint(size, scale_factor));
