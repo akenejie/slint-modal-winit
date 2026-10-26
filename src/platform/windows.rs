@@ -502,6 +502,12 @@ pub trait WindowAttributesExtWindows {
     /// Customize the window class name.
     fn with_class_name<S: Into<String>>(self, class_name: S) -> Self;
 
+    /// Custom (ikng-neteditor patch): This sets `WS_EX_DLGMODALFRAME` at window
+    /// creation and keeps it in every style recomputation. Windows then treats
+    /// the window as a dialog frame and never draws a title bar icon (no
+    /// exe-icon fallback), without changing to a tool window.
+    fn with_dialog_modal_frame(self, flag: bool) -> Self;
+
     /// Shows or hides the background drop shadow for undecorated windows.
     ///
     /// The shadow is hidden by default.
@@ -577,6 +583,12 @@ impl WindowAttributesExtWindows for WindowAttributes {
     #[inline]
     fn with_class_name<S: Into<String>>(mut self, class_name: S) -> Self {
         self.platform_specific.class_name = class_name.into();
+        self
+    }
+
+    #[inline]
+    fn with_dialog_modal_frame(mut self, flag: bool) -> Self {
+        self.platform_specific.dialog_modal_frame = flag;
         self
     }
 

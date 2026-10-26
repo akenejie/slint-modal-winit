@@ -15,7 +15,7 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOREPOSITION, SWP_NOSIZE, SWP_NOZORDER,
     SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, SW_SHOWNOACTIVATE, WINDOWPLACEMENT,
     WINDOW_EX_STYLE, WINDOW_STYLE, WS_BORDER, WS_CAPTION, WS_CHILD, WS_CLIPCHILDREN,
-    WS_CLIPSIBLINGS, WS_EX_ACCEPTFILES, WS_EX_APPWINDOW, WS_EX_LAYERED, WS_EX_NOREDIRECTIONBITMAP,
+    WS_CLIPSIBLINGS,     WS_EX_ACCEPTFILES, WS_EX_APPWINDOW, WS_EX_DLGMODALFRAME, WS_EX_LAYERED, WS_EX_NOREDIRECTIONBITMAP,
     WS_EX_TOPMOST, WS_EX_TRANSPARENT, WS_EX_WINDOWEDGE, WS_MAXIMIZE, WS_MAXIMIZEBOX, WS_MINIMIZE,
     WS_MINIMIZEBOX, WS_OVERLAPPEDWINDOW, WS_POPUP, WS_SIZEBOX, WS_SYSMENU, WS_VISIBLE,
 };
@@ -123,6 +123,10 @@ bitflags! {
         const MARKER_ACTIVATE = 1 << 21;
 
         const CLIP_CHILDREN = 1 << 22;
+
+        /// Custom (ikng-neteditor patch): keep `WS_EX_DLGMODALFRAME` in the
+        /// recomputed ex-style so the title bar shows no icon (dialog frame).
+        const DIALOG_MODAL_FRAME = 1 << 23;
 
         const EXCLUSIVE_FULLSCREEN_OR_MASK = WindowFlags::ALWAYS_ON_TOP.bits();
     }
@@ -302,6 +306,9 @@ impl WindowFlags {
         }
         if self.contains(WindowFlags::CLIP_CHILDREN) {
             style |= WS_CLIPCHILDREN;
+        }
+        if self.contains(WindowFlags::DIALOG_MODAL_FRAME) {
+            style_ex |= WS_EX_DLGMODALFRAME;
         }
 
         if self.intersects(

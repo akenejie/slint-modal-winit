@@ -1190,6 +1190,41 @@ impl Window {
         self.window.maybe_queue_on_main(move |w| w.set_window_level(level))
     }
 
+    /// X11 のウィンドウ ID (`Window`)。transient の親指定などに使う。
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **X11:** 生の X11 ウィンドウ ID を返す。
+    /// - **他:** `None`。
+    pub fn xlib_window(&self) -> Option<u32> {
+        self.window
+            .maybe_wait_on_main(|w| w.x11_window_id())
+    }
+
+    /// ICCCM の `WM_TRANSIENT_FOR` を設定する (X11 のみ)。親ウィンドウを指定すると
+    /// ウィンドウ マネージャがこのウィンドウをダイアログとして扱う。`None` で解除。
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **X11:** `WM_TRANSIENT_FOR` を設定する。
+    /// - **他:** 何もしない。
+    pub fn set_transient_for(&self, parent: Option<u32>) {
+        self.window
+            .maybe_queue_on_main(move |w| w.set_transient_for(parent))
+    }
+
+    /// `_NET_WM_STATE_MODAL` を設定する (X11 のみ)。対応したウィンドウ
+    /// マネージャはこのウィンドウをモーダルとして扱う。
+    ///
+    /// ## Platform-specific
+    ///
+    /// - **X11:** `_NET_WM_STATE_MODAL` を付与する。
+    /// - **他:** 何もしない。
+    pub fn set_modal(&self, modal: bool) {
+        self.window
+            .maybe_queue_on_main(move |w| w.set_modal(modal))
+    }
+
     /// Sets the window icon.
     ///
     /// On Windows and X11, this is typically the small icon in the top-left

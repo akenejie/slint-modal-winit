@@ -59,7 +59,7 @@ struct MwmHints {
 }
 
 #[allow(dead_code)]
-mod mwm {
+pub(crate) mod mwm {
     // Motif WM hints are obsolete, but still widely supported.
     // https://stackoverflow.com/a/1909708
     pub const MWM_HINTS_FUNCTIONS: u32 = 1 << 0;
@@ -71,6 +71,28 @@ mod mwm {
     pub const MWM_FUNC_MINIMIZE: u32 = 1 << 3;
     pub const MWM_FUNC_MAXIMIZE: u32 = 1 << 4;
     pub const MWM_FUNC_CLOSE: u32 = 1 << 5;
+
+    pub const MWM_DECOR_ALL: u32 = 1 << 0;
+    pub const MWM_DECOR_BORDER: u32 = 1 << 1;
+    pub const MWM_DECOR_RESIZEH: u32 = 1 << 2;
+    pub const MWM_DECOR_TITLE: u32 = 1 << 3;
+    pub const MWM_DECOR_MENU: u32 = 1 << 4;
+    pub const MWM_DECOR_MINIMIZE: u32 = 1 << 5;
+    pub const MWM_DECOR_MAXIMIZE: u32 = 1 << 6;
+
+    pub const MWM_DECOR_EVERYTHING: u32 = MWM_DECOR_BORDER
+        | MWM_DECOR_RESIZEH
+        | MWM_DECOR_TITLE
+        | MWM_DECOR_MENU
+        | MWM_DECOR_MINIMIZE
+        | MWM_DECOR_MAXIMIZE;
+}
+
+// 最小化 / 最大化ボタンを除いた装飾ビット。Weston WM はこの
+// MWM_DECOR_MINIMIZE / MWM_DECOR_MAXIMIZE ビットを見てタイトルバーの
+// ボタンを描画する。
+pub fn mwm_decor_without_min_max() -> u32 {
+    mwm::MWM_DECOR_EVERYTHING & !(mwm::MWM_DECOR_MINIMIZE | mwm::MWM_DECOR_MAXIMIZE)
 }
 
 impl MotifHints {
@@ -82,7 +104,37 @@ impl MotifHints {
 
     pub fn set_decorations(&mut self, decorations: bool) {
         self.hints.flags |= mwm::MWM_HINTS_DECORATIONS;
-        self.hints.decorations = decorations as u32;
+        if decorations {
+            // 枠ありのときは「タイトル + 枠 + 最小化/最大化ボタン」を明示する
+            // (Weston WM は MWM_DECOR_MINIMIZE / MWM_DECOR_MAXIMIZE ビットで
+            // タイトルバーのボタンを描く)。
+            self.set_decor_mask(mwm::MWM_DECOR_EVERYTHING);
+        } else {
+            // 0 を入れると「装飾なし」になり、枠が完全に落ちる。
+            self.set_decor_mask(0);
+        }
+    }
+
+    // タイトルバーは残しつつ、最小化 / 最大化ボタンだけを落とす。
+    pub fn set_buttons(&mut self, decorations: u32) {
+        self.hints.flags |= mwm::MWM_HINTS_DECORATIONS;
+        self.set_decor_mask(decorations);
+    }
+
+    // decorations ビットマスクを設定する。WSLg の Weston WM (および
+    // xwayland の window-manager.c) は _MOTIF_WM_HINTS の 3 番目の要素
+    // (decorations) を見て枠とタイトルバーのボタンを決める。
+    //
+    // WSLg では、この要素を書くと X サーバー側で 5 要素の並びが
+    // [flags, 0, functions, 0, decorations] に詰め直され、本来
+    // decorations に入れた値が functions の位置 (3 番目) に移動する。
+    // functions と decorations の両方に同じ値を入れておけば、通常の
+    // X サーバー (decorations を見る) でも WSLg (functions の位置を見る)
+    // でも同じ結果になる。flags には FUNCTIONS ビットを立てないため、
+    // functions フィールドは本来の用途では無視され副作用はない。
+    pub(crate) fn set_decor_mask(&mut self, decorations: u32) {
+        self.hints.functions = decorations;
+        self.hints.decorations = decorations;
     }
 
     pub fn set_maximizable(&mut self, maximizable: bool) {

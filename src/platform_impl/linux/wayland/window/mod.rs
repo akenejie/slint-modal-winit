@@ -429,6 +429,18 @@ impl Window {
     #[inline]
     pub fn set_window_level(&self, _level: WindowLevel) {}
 
+    // X11 専用。Wayland では X11 ウィンドウ ID や ICCCM transient は存在しない。
+    #[inline]
+    pub fn x11_window_id(&self) -> u32 {
+        0
+    }
+
+    #[inline]
+    pub fn set_transient_for(&self, _parent: Option<u32>) {}
+
+    #[inline]
+    pub fn set_modal(&self, _modal: bool) {}
+
     #[inline]
     pub(crate) fn set_window_icon(&self, _window_icon: Option<PlatformIcon>) {}
 

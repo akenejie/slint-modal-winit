@@ -878,6 +878,18 @@ impl Window {
         });
     }
 
+    // X11 専用 API のスタブ。Windows では何もしない。
+    #[inline]
+    pub fn x11_window_id(&self) -> Option<u32> {
+        None
+    }
+
+    #[inline]
+    pub fn set_transient_for(&self, _parent: Option<u32>) {}
+
+    #[inline]
+    pub fn set_modal(&self, _modal: bool) {}
+
     #[inline]
     pub fn current_monitor(&self) -> Option<MonitorHandle> {
         Some(monitor::current_monitor(self.hwnd()))
@@ -1329,6 +1341,10 @@ unsafe fn init(
     // so the diffing later can work.
     window_flags.set(WindowFlags::CLOSABLE, true);
     window_flags.set(WindowFlags::CLIP_CHILDREN, attributes.platform_specific.clip_children);
+    window_flags.set(
+        WindowFlags::DIALOG_MODAL_FRAME,
+        attributes.platform_specific.dialog_modal_frame,
+    );
 
     let mut fallback_parent = || match attributes.platform_specific.owner {
         Some(parent) => {

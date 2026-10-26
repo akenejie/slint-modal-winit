@@ -508,6 +508,21 @@ impl Window {
     }
 
     #[inline]
+    pub fn x11_window_id(&self) -> Option<u32> {
+        x11_or_wayland!(match self; Window(w) => Some(w.x11_window_id()))
+    }
+
+    #[inline]
+    pub fn set_transient_for(&self, parent: Option<u32>) {
+        x11_or_wayland!(match self; Window(w) => w.set_transient_for(parent))
+    }
+
+    #[inline]
+    pub fn set_modal(&self, modal: bool) {
+        x11_or_wayland!(match self; Window(w) => w.set_modal(modal))
+    }
+
+    #[inline]
     pub fn set_window_icon(&self, window_icon: Option<Icon>) {
         x11_or_wayland!(match self; Window(w) => w.set_window_icon(window_icon.map(|icon| icon.inner)))
     }
