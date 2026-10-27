@@ -508,6 +508,14 @@ pub trait WindowAttributesExtWindows {
     /// exe-icon fallback), without changing to a tool window.
     fn with_dialog_modal_frame(self, flag: bool) -> Self;
 
+    /// Custom (ikng-neteditor patch): When the window is shown
+    /// (set_visible(true)), and only then, position it centered over its
+    /// owner window. The position is computed from the real window rects right
+    /// before ShowWindow, so the first frame already appears at the correct
+    /// place (no post-show flicker). Requires an owner window
+    /// (with_owner_window); without one this is a no-op.
+    fn with_dialog_center_over_owner(self, flag: bool) -> Self;
+
     /// Shows or hides the background drop shadow for undecorated windows.
     ///
     /// The shadow is hidden by default.
@@ -589,6 +597,12 @@ impl WindowAttributesExtWindows for WindowAttributes {
     #[inline]
     fn with_dialog_modal_frame(mut self, flag: bool) -> Self {
         self.platform_specific.dialog_modal_frame = flag;
+        self
+    }
+
+    #[inline]
+    fn with_dialog_center_over_owner(mut self, flag: bool) -> Self {
+        self.platform_specific.dialog_center_over_owner = flag;
         self
     }
 

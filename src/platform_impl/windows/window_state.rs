@@ -9,9 +9,10 @@ use std::sync::MutexGuard;
 use windows_sys::Win32::Foundation::{HWND, RECT};
 use windows_sys::Win32::Graphics::Gdi::InvalidateRgn;
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    AdjustWindowRectEx, EnableMenuItem, GetMenu, GetSystemMenu, GetWindowLongW, SendMessageW,
+    AdjustWindowRectEx, EnableMenuItem, GetMenu, GetSystemMenu, GetWindow, GetWindowLongW,
+    GetWindowRect, SendMessageW,
     SetWindowLongW, SetWindowPos, ShowWindow, GWL_EXSTYLE, GWL_STYLE, HWND_BOTTOM, HWND_NOTOPMOST,
-    HWND_TOPMOST, MF_BYCOMMAND, MF_DISABLED, MF_ENABLED, SC_CLOSE, SWP_ASYNCWINDOWPOS,
+    GW_OWNER, HWND_TOPMOST, MF_BYCOMMAND, MF_DISABLED, MF_ENABLED, SC_CLOSE, SWP_ASYNCWINDOWPOS,
     SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOREPOSITION, SWP_NOSIZE, SWP_NOZORDER,
     SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, SW_SHOWNOACTIVATE, WINDOWPLACEMENT,
     WINDOW_EX_STYLE, WINDOW_STYLE, WS_BORDER, WS_CAPTION, WS_CHILD, WS_CLIPCHILDREN,
@@ -56,6 +57,10 @@ pub(crate) struct WindowState {
     pub dragging: bool,
 
     pub skip_taskbar: bool,
+
+    /// (ikng-neteditor patch) Center the window over its owner right before it
+    /// becomes visible (set_visible(true)). See PlatformSpecificWindowAttributes.
+    pub center_over_owner: bool,
 }
 
 #[derive(Clone)]
@@ -170,6 +175,7 @@ impl WindowState {
             current_theme,
             preferred_theme,
             window_flags: WindowFlags::empty(),
+            center_over_owner: attributes.platform_specific.dialog_center_over_owner,
 
             ime_state: ImeState::Disabled,
             ime_allowed: false,
@@ -196,7 +202,19 @@ impl WindowState {
         f(&mut this.window_flags);
         let new_flags = this.window_flags;
 
+        let center_over_owner = this.center_over_owner;
         drop(this);
+        // (ikng-neteditor patch) A dialog window with an owner is positioned
+        // centered over the owner right before it becomes visible: the rects
+        // are final by now (slint resizes just before revealing) and moving
+        // before ShowWindow means the first frame already appears at the
+        // right place — no post-show flicker.
+        if center_over_owner
+            && new_flags.contains(WindowFlags::VISIBLE)
+            && !old_flags.contains(WindowFlags::VISIBLE)
+        {
+            center_dialog_over_owner(window);
+        }
         old_flags.apply_diff(window, new_flags);
     }
 
@@ -548,5 +566,37 @@ impl CursorFlags {
         }
 
         Ok(())
+    }
+}
+
+/// (ikng-neteditor patch) Position window centered over its owner using the
+/// real window rects. No-op when the window has no owner.
+fn center_dialog_over_owner(window: HWND) {
+    unsafe {
+        let owner = GetWindow(window, GW_OWNER);
+        if owner == 0 {
+            return;
+        }
+        let (mut owner_rect, mut self_rect) = (
+            RECT { left: 0, top: 0, right: 0, bottom: 0 },
+            RECT { left: 0, top: 0, right: 0, bottom: 0 },
+        );
+        if GetWindowRect(owner, &mut owner_rect) == 0 || GetWindowRect(window, &mut self_rect) == 0
+        {
+            return;
+        }
+        let w = self_rect.right - self_rect.left;
+        let h = self_rect.bottom - self_rect.top;
+        let x = owner_rect.left + ((owner_rect.right - owner_rect.left) - w) / 2;
+        let y = owner_rect.top + ((owner_rect.bottom - owner_rect.top) - h) / 2;
+        SetWindowPos(
+            window,
+            0,
+            x,
+            y,
+            0,
+            0,
+            SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE,
+        );
     }
 }
