@@ -86,7 +86,10 @@ cfg_aliases = "0.2.1"
 [dependencies]
 bitflags = "2"
 cursor-icon = "1.1.0"
-dpi = { version = "0.1.1", path = "dpi" }
+# crates.io の dpi に統一する (path 依存のままでは git チェックアウト内の dpi 0.1.1 が
+# 別クレートになり、muda 等が要求する crates.io dpi 0.1.2 と二重化して
+# i-slint-backend-winit の muda 連携が型不一致で落ちる。^0.1.1 は 0.1.2 を含む)。
+dpi = "0.1.1"
 rwh_04 = { package = "raw-window-handle", version = "0.4", optional = true }
 rwh_05 = { package = "raw-window-handle", version = "0.5.2", features = [
     "std",
