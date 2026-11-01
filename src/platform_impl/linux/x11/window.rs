@@ -1141,7 +1141,7 @@ impl UnownedWindow {
                 state,
                 xproto::AtomEnum::ATOM.into(),
                 xproto::PropMode::REPLACE,
-                &[atoms[_NET_WM_STATE_MODAL].resource_id()],
+                &[atoms[_NET_WM_STATE_MODAL]],
             )?;
         } else {
             self.xconn
