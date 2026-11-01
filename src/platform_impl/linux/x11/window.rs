@@ -1126,7 +1126,28 @@ impl UnownedWindow {
 
     // ICCCM/EWMH のモーダル状態。_NET_WM_STATE_MODAL を付与する。対応した
     // ウィンドウ マネージャはダイアログをモーダルとして扱う。
+    //
+    // EWMH の ClientMessage (toggle_atom) はウィンドウが WM に管理された
+    // (マップされた) 後でなければ WM に無視される。マップ前に modal 状態を
+    // 伝えるには _NET_WM_STATE プロパティを直接書く (WM は管理開始時に読む)。
+    // 両方行うことで、マップ前の呼び出しでもプロパティ経由で確実に伝わり、
+    // マップ後の呼び出しでは ClientMessage で WM の状態も即時更新される。
     fn set_modal_inner(&self, modal: bool) -> Result<VoidCookie<'_>, X11Error> {
+        let atoms = self.xconn.atoms();
+        let state = atoms[_NET_WM_STATE];
+        if modal {
+            self.xconn.change_property(
+                self.xwindow,
+                state,
+                xproto::AtomEnum::ATOM.into(),
+                xproto::PropMode::REPLACE,
+                &[atoms[_NET_WM_STATE_MODAL].resource_id()],
+            )?;
+        } else {
+            self.xconn
+                .xcb_connection()
+                .delete_property(self.xwindow, state)?;
+        }
         self.toggle_atom(_NET_WM_STATE_MODAL, modal)
     }
 
