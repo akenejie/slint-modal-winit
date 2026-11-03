@@ -504,6 +504,24 @@ impl UnownedWindow {
             leap!(xconn.select_xinput_events(window.xwindow, super::ALL_MASTER_DEVICES, mask))
                 .ignore_error();
 
+            // X11: WM_TRANSIENT_FOR を生成時に書き込む。この XCB 要求はマップ
+            // (XMapWindow) と同じ接続の同じストリームに載るため、生成後にど
+            // のタイミングでマップされても、WM は管理開始時に transient を解
+            // 决できる。Mutter は管理開始時にしか transient を解決せず、解決
+            // できないと親基準の配置 (ダイアログの中央寄せ) を行わない。
+            if let Some(parent) = window_attrs.x11_transient_for {
+                leap!(xconn.xcb_connection().change_property(
+                    xproto::PropMode::REPLACE,
+                    window.xwindow,
+                    atoms[WM_TRANSIENT_FOR],
+                    xproto::AtomEnum::WINDOW,
+                    32,
+                    1,
+                    bytemuck::cast_slice::<u32, u8>(&[parent]),
+                ))
+                .ignore_error();
+            }
+
             // Set visibility (map window)
             if window_attrs.visible {
                 leap!(xconn.xcb_connection().map_window(window.xwindow)).ignore_error();

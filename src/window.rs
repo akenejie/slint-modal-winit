@@ -111,6 +111,12 @@ pub struct WindowAttributes {
     pub title: String,
     pub maximized: bool,
     pub visible: bool,
+    /// X11: 生成時に書き込む ICCCM の WM_TRANSIENT_FOR (所有者 = transient の
+    /// 親ウィンドウ ID)。XMapWindow と同じ要求ストリームに載るため、生成後に
+    /// どのタイミングでマップされてもウィンドウ マネージャは transient を解
+    /// 决できる (Mutter は管理開始時にしか transient を解決せず、解決できな
+    /// いと親基準の配置を行わない)。
+    pub x11_transient_for: Option<u32>,
     pub transparent: bool,
     pub blur: bool,
     pub decorations: bool,
@@ -143,6 +149,7 @@ impl Default for WindowAttributes {
             maximized: false,
             fullscreen: None,
             visible: true,
+            x11_transient_for: None,
             transparent: false,
             blur: false,
             decorations: true,
@@ -313,6 +320,15 @@ impl WindowAttributes {
     #[inline]
     pub fn with_visible(mut self, visible: bool) -> Self {
         self.visible = visible;
+        self
+    }
+
+    /// X11: 生成時に書き込む WM_TRANSIENT_FOR (transient の親) を設定する。
+    /// `None` で解除 (既定)。ウィンドウ生成要求と同じストリームで書き込まれ
+    /// るため、生成後すぐにマップされても WM は transient を解決できる。
+    #[inline]
+    pub fn with_x11_transient_for(mut self, parent: Option<u32>) -> Self {
+        self.x11_transient_for = parent;
         self
     }
 
