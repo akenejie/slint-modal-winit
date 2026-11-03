@@ -66,6 +66,22 @@ pub type XErrorHandler =
     Option<unsafe extern "C" fn(*mut ffi::Display, *mut ffi::XErrorEvent) -> std::os::raw::c_int>;
 
 impl XConnection {
+
+	/// ユーザー入力の時刻を指定窓の `_NET_WM_USER_TIME` へ記録する (EWMH)。
+	/// フォーカス盗み取り防止はこのプロパティを見るため、ツールキットが入
+	/// 力イベントのたびに更新する責務を持つ (GTK と同じ)。
+	pub fn set_user_time(&self, window: xproto::Window, time: xproto::Timestamp) {
+		let atoms = self.atoms();
+		self.change_property(
+			window,
+			atoms[_NET_WM_USER_TIME],
+			xproto::Atom::from(xproto::AtomEnum::CARDINAL),
+			xproto::PropMode::REPLACE,
+			&[time],
+		)
+		.expect_then_ignore_error("Failed to set _NET_WM_USER_TIME");
+	}
+
     pub fn new(error_handler: XErrorHandler) -> Result<XConnection, XNotSupported> {
         // opening the libraries
         let xlib = ffi::Xlib::open()?;
