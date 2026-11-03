@@ -195,12 +195,12 @@ impl EventProcessor {
             xlib::KeyPress => {
                 let xev: &XKeyEvent = xev.as_ref();
                 let wt = Self::window_target(&self.target);
-                wt.xconn.set_user_time2(xev.window as xproto::Window, xev.time);
+                wt.xconn.set_user_time(xev.window as xproto::Window, xev.time as xproto::Timestamp);
             },
             xlib::ButtonPress => {
                 let xev: &XButtonEvent = xev.as_ref();
                 let wt = Self::window_target(&self.target);
-                wt.xconn.set_user_time2(xev.window as xproto::Window, xev.time);
+                wt.xconn.set_user_time(xev.window as xproto::Window, xev.time as xproto::Timestamp);
             },
             _ => {},
         }
