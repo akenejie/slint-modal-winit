@@ -604,10 +604,6 @@ impl UnownedWindow {
             .expect_then_ignore_error("Failed to set _NET_WM_USER_TIME");
     }
 
-    pub(super) fn shared_state_lock(&self) -> MutexGuard<'_, SharedState> {
-        self.shared_state.lock().unwrap()
-    }
-
     fn set_pid(&self) -> Result<Option<VoidCookie<'_>>, X11Error> {
         let atoms = self.xconn.atoms();
         let pid_atom = atoms[_NET_WM_PID];
