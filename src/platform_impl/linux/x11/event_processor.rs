@@ -10,7 +10,8 @@ use x11_dl::xinput2::{
 };
 use x11_dl::xlib::{
     self, Display as XDisplay, Window as XWindow, XAnyEvent, XClientMessageEvent, XConfigureEvent,
-    XDestroyWindowEvent, XEvent, XExposeEvent, XKeyEvent, XMapEvent, XPropertyEvent,
+    XButtonEvent, XDestroyWindowEvent, XEvent, XExposeEvent, XKeyEvent, XMapEvent,
+    XPropertyEvent,
     XReparentEvent, XSelectionEvent, XVisibilityEvent, XkbAnyEvent, XkbStateRec,
 };
 use x11rb::protocol::xinput;
