@@ -49,6 +49,7 @@ atom_manager! {
     _NET_WM_NAME,
     _NET_WM_PID,
     _NET_WM_PING,
+    _NET_WM_USER_TIME,
     _NET_WM_STATE,
     _NET_WM_STATE_ABOVE,
     _NET_WM_STATE_BELOW,
