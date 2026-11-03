@@ -587,6 +587,27 @@ impl UnownedWindow {
         self.shared_state.lock().unwrap()
     }
 
+    /// ユーザー入力の時刻を `_NET_WM_USER_TIME` へ記録する (EWMH)。ツールキッ
+    /// トの責務: フォーカス盗み取り防止はこのプロパティを見るため、入力イベ
+    /// ントのたびに更新しないと、後に開く子ダイアログが「ユーザー操作と無関
+    /// 係に開いた窓」と扱われ、WM (Mutter) がフォーカスや親基準配置をしない。
+    pub fn set_user_time2(&self, window: xproto::Window, time: xproto::Timestamp) {
+        let atoms = self.atoms();
+        self.xconn
+            .change_property(
+                window,
+                atoms[_NET_WM_USER_TIME],
+                xproto::Atom::from(xproto::AtomEnum::CARDINAL),
+                xproto::PropMode::REPLACE,
+                &[time],
+            )
+            .expect_then_ignore_error("Failed to set _NET_WM_USER_TIME");
+    }
+
+    pub(super) fn shared_state_lock(&self) -> MutexGuard<'_, SharedState> {
+        self.shared_state.lock().unwrap()
+    }
+
     fn set_pid(&self) -> Result<Option<VoidCookie<'_>>, X11Error> {
         let atoms = self.xconn.atoms();
         let pid_atom = atoms[_NET_WM_PID];

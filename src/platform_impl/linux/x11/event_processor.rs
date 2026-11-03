@@ -184,6 +184,26 @@ impl EventProcessor {
             return;
         }
 
+        // ユーザー入力 (キー / ボタンの押下) を検知したら、そのイベントのタイ
+        // ムスタンプを受信側の窓の `_NET_WM_USER_TIME` へ記録する。EWMH のフォ
+        // ーカス盗み取り防止はこのプロパティを見るため、ツールキットが入力イ
+        // ベントのたびに更新する責務を持つ (GTK と同じ)。これが無いと、後に開
+        // かれるモーダル子ダイアログが「ユーザー操作と無関係に開いた窓」と扱
+        // われ、Mutter はフォーカスを与えず親基準の配置も行わない。
+        match event_type {
+            xlib::KeyPress => {
+                let xev: &XKeyEvent = xev.as_ref();
+                let wt = Self::window_target(&self.target);
+                wt.xconn.set_user_time2(xev.window as xproto::Window, xev.time);
+            },
+            xlib::ButtonPress => {
+                let xev: &XButtonEvent = xev.as_ref();
+                let wt = Self::window_target(&self.target);
+                wt.xconn.set_user_time2(xev.window as xproto::Window, xev.time);
+            },
+            _ => {},
+        }
+
         match event_type {
             xlib::ClientMessage => self.client_message(xev.as_ref(), &mut callback),
             xlib::SelectionNotify => self.selection_notify(xev.as_ref(), &mut callback),
