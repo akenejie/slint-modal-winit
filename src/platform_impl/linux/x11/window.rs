@@ -545,7 +545,7 @@ impl UnownedWindow {
             // の書き込みでは間に合わず、WM は「ユーザー操作と無関係に開いた
             // 窓」としてフォーカスを与えない (Mutter で実機確認済み)。接続が
             // 最後に受信した入力イベントのタイムスタンプを使う。
-            let last_ts = xconn.timestamp.load(std::sync::atomic::Ordering::Relaxed);
+            let last_ts = xconn.timestamp();
             if last_ts != 0 {
                 if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
                     eprintln!(
