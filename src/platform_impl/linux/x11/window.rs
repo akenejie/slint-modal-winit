@@ -524,6 +524,9 @@ impl UnownedWindow {
 
             // Set visibility (map window)
             if window_attrs.visible {
+                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                    eprintln!("[modal-dbg] winit 生成時にマップ win={}", window.xwindow);
+                }
                 leap!(xconn.xcb_connection().map_window(window.xwindow)).ignore_error();
                 leap!(xconn.xcb_connection().configure_window(
                     xwindow,
@@ -1216,6 +1219,10 @@ impl UnownedWindow {
 
     #[inline]
     pub fn set_visible(&self, visible: bool) {
+        // (診断) マップ / アンマップの呼び出し元の切り分け用。
+        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+            eprintln!("[modal-dbg] winit set_visible({visible}) win={}", self.xwindow);
+        }
         let mut shared_state = self.shared_state_lock();
 
         match (visible, shared_state.visibility) {
