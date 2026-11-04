@@ -522,6 +522,49 @@ impl UnownedWindow {
                 .ignore_error();
             }
 
+            // X11: _NET_WM_STATE_MODAL を生成時に書き込む (EWMH)。ClientMessage
+            // はマップ前 / 未管理の窓には WM に無視されるため、管理開始時に読
+            // んでもらうには生成時のプロパティが必要 (post-creation の
+            // set_modal は管理開始とのレースで間に合わないことがある)。
+            if window_attrs.x11_modal {
+                leap!(xconn.xcb_connection().change_property(
+                    xproto::PropMode::REPLACE,
+                    window.xwindow,
+                    atoms[_NET_WM_STATE],
+                    xproto::AtomEnum::ATOM,
+                    32,
+                    1,
+                    bytemuck::cast_slice::<xproto::Atom, u8>(&[atoms[_NET_WM_STATE_MODAL]]),
+                ))
+                .ignore_error();
+            }
+
+            // X11: _NET_WM_USER_TIME を生成時に書き込む (EWMH)。GTK と同じく、
+            // この窓を開かせたユーザー操作の時刻を焼き込む。WM は管理開始時に
+            // この値でフォーカス盗み取り防止を判定するため、生成後 (マップ後)
+            // の書き込みでは間に合わず、WM は「ユーザー操作と無関係に開いた
+            // 窓」としてフォーカスを与えない (Mutter で実機確認済み)。接続が
+            // 最後に受信した入力イベントのタイムスタンプを使う。
+            let last_ts = xconn.timestamp.load(std::sync::atomic::Ordering::Relaxed);
+            if last_ts != 0 {
+                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                    eprintln!(
+                        "[modal-dbg] winit 生成時に user time 焼き込み win={} t={}",
+                        window.xwindow, last_ts
+                    );
+                }
+                leap!(xconn.xcb_connection().change_property(
+                    xproto::PropMode::REPLACE,
+                    window.xwindow,
+                    atoms[_NET_WM_USER_TIME],
+                    xproto::Atom::from(xproto::AtomEnum::CARDINAL),
+                    32,
+                    1,
+                    bytemuck::cast_slice::<u32, u8>(&[last_ts]),
+                ))
+                .ignore_error();
+            }
+
             // Set visibility (map window)
             if window_attrs.visible {
                 if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
