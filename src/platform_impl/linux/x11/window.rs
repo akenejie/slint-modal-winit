@@ -547,12 +547,13 @@ impl UnownedWindow {
             // 最後に受信した入力イベントのタイムスタンプを使う。
             let last_ts = xconn.timestamp();
             if last_ts != 0 {
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                    eprintln!(
-                        "[modal-dbg] winit 生成時に user time 焼き込み win={} t={}",
-                        window.xwindow, last_ts
-                    );
-                }
+                // (診断コード・コメントアウト) 焼き込み値の確認用。
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //     eprintln!(
+                //         "[modal-dbg] winit 生成時に user time 焼き込み win={} t={}",
+                //         window.xwindow, last_ts
+                //     );
+                // }
                 leap!(xconn.xcb_connection().change_property(
                     xproto::PropMode::REPLACE,
                     window.xwindow,
@@ -567,9 +568,10 @@ impl UnownedWindow {
 
             // Set visibility (map window)
             if window_attrs.visible {
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                    eprintln!("[modal-dbg] winit 生成時にマップ win={}", window.xwindow);
-                }
+                // (診断コード・コメントアウト) 生成時マップの確認用。
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //     eprintln!("[modal-dbg] winit 生成時にマップ win={}", window.xwindow);
+                // }
                 leap!(xconn.xcb_connection().map_window(window.xwindow)).ignore_error();
                 leap!(xconn.xcb_connection().configure_window(
                     xwindow,
@@ -898,11 +900,14 @@ impl UnownedWindow {
 
         match shared_state.visibility {
             Visibility::No => {
-                // (診断) 非表示扱いの窓への VisibilityNotify で unmap する経路。
-                // 予期しない withdraw (ちらつき) の切り分け用に出力する。
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                    eprintln!("[modal-dbg] winit visibility_notify: 状態 No → unmap win={}", self.xwindow);
-                }
+                // (診断コード・コメントアウト) 非表示扱いの窓への VisibilityNotify
+                // で unmap する経路の確認用。ERGON_MODAL_DEBUG=1 で出力していた。
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //     eprintln!(
+                //         "[modal-dbg] winit visibility_notify: 状態 No → unmap win={}",
+                //         self.xwindow
+                //     );
+                // }
                 self.xconn
                     .xcb_connection()
                     .unmap_window(self.xwindow)
@@ -1269,13 +1274,14 @@ impl UnownedWindow {
     #[inline]
     pub fn set_visible(&self, visible: bool) {
         let mut shared_state = self.shared_state_lock();
-        // (診断) マップ / アンマップの呼び出し元の切り分け用。
-        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-            eprintln!(
-                "[modal-dbg] winit set_visible({visible}) win={} state={:?}",
-                self.xwindow, shared_state.visibility
-            );
-        }
+        // (診断コード・コメントアウト) マップ / アンマップの呼び出し経路の切
+        // り分け用。ERGON_MODAL_DEBUG=1 で出力していた。
+        // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+        //     eprintln!(
+        //         "[modal-dbg] winit set_visible({visible}) win={} state={:?}",
+        //         self.xwindow, shared_state.visibility
+        //     );
+        // }
 
         match (visible, shared_state.visibility) {
             (true, Visibility::Yes) | (true, Visibility::YesWait) | (false, Visibility::No) => {
