@@ -117,6 +117,10 @@ pub struct WindowAttributes {
     /// 决できる (Mutter は管理開始時にしか transient を解決せず、解決できな
     /// いと親基準の配置を行わない)。
     pub x11_transient_for: Option<u32>,
+    /// X11: 生成時に `_NET_WM_STATE_MODAL` を焼き込む。EWMH の ClientMessage
+    /// はマップ前 / 未管理の窓には WM に無視されるため、モーダル状態を WM に
+    /// 管理開始時に伝えるには生成時のプロパティが必要。
+    pub x11_modal: bool,
     pub transparent: bool,
     pub blur: bool,
     pub decorations: bool,
@@ -150,6 +154,7 @@ impl Default for WindowAttributes {
             fullscreen: None,
             visible: true,
             x11_transient_for: None,
+            x11_modal: false,
             transparent: false,
             blur: false,
             decorations: true,
@@ -329,6 +334,14 @@ impl WindowAttributes {
     #[inline]
     pub fn with_x11_transient_for(mut self, parent: Option<u32>) -> Self {
         self.x11_transient_for = parent;
+        self
+    }
+
+    /// X11: 生成時に `_NET_WM_STATE_MODAL` を焼き込むか (既定 `false`)。
+    /// マップ前に WM へモーダル状態を伝える。
+    #[inline]
+    pub fn with_x11_modal(mut self, modal: bool) -> Self {
+        self.x11_modal = modal;
         self
     }
 
