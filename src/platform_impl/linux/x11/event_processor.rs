@@ -658,6 +658,20 @@ impl EventProcessor {
         let new_inner_size = (xev.width as u32, xev.height as u32);
         let new_inner_position = (xev.x, xev.y);
 
+        // (診断) モーダル ダイアログのちらつき調査: WM による再配置 / サイズ
+        // 変更をすべて記録する。ERGON_MODAL_DEBUG=1 で有効。
+        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+            eprintln!(
+                "[modal-dbg] ConfigureNotify win={} pos=({},{}) size=({},{}) synthetic={}",
+                xwindow,
+                new_inner_position.0,
+                new_inner_position.1,
+                new_inner_size.0,
+                new_inner_size.1,
+                xev.send_event
+            );
+        }
+
         let (mut resized, moved) = {
             let mut shared_state_lock = window.shared_state_lock();
 
