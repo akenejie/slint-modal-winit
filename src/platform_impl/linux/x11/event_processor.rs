@@ -659,18 +659,18 @@ impl EventProcessor {
         let new_inner_position = (xev.x, xev.y);
 
         // (診断) モーダル ダイアログのちらつき調査: WM による再配置 / サイズ
-        // 変更をすべて記録する。ERGON_MODAL_DEBUG=1 で有効。
-        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-            eprintln!(
-                "[modal-dbg] ConfigureNotify win={} pos=({},{}) size=({},{}) synthetic={}",
-                xwindow,
-                new_inner_position.0,
-                new_inner_position.1,
-                new_inner_size.0,
-                new_inner_size.1,
-                xev.send_event
-            );
-        }
+        // 変更をすべて記録する。ERGON_MODAL_DEBUG=1 で出力 (使うときはコメントを外す)。
+        // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+        //     eprintln!(
+        //         "[modal-dbg] ConfigureNotify win={} pos=({},{}) size=({},{}) synthetic={}",
+        //         xwindow,
+        //         new_inner_position.0,
+        //         new_inner_position.1,
+        //         new_inner_size.0,
+        //         new_inner_size.1,
+        //         xev.send_event
+        //     );
+        // }
 
         let (mut resized, moved) = {
             let mut shared_state_lock = window.shared_state_lock();
@@ -895,30 +895,30 @@ impl EventProcessor {
         // 切り分け: 装飾 / 配置に関わるプロパティ変更をすべて記録する。自前
         // の WM_NORMAL_HINTS 書き換え (slint の制約適用など) と、WM による
         // _NET_FRAME_EXTENTS 更新 (装飾の再計算) が、どの順で起きるかを見
-        // る。ERGON_MODAL_DEBUG=1 で有効。
-        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-            let name = if atom == xproto::Atom::from(xproto::AtomEnum::WM_NORMAL_HINTS) {
-                Some("WM_NORMAL_HINTS")
-            } else if atom == atoms[_MOTIF_WM_HINTS] {
-                Some("_MOTIF_WM_HINTS")
-            } else if atom == atoms[_NET_FRAME_EXTENTS] {
-                Some("_NET_FRAME_EXTENTS")
-            } else if atom == atoms[WM_TRANSIENT_FOR] {
-                Some("WM_TRANSIENT_FOR")
-            } else if atom == atoms[_NET_WM_STATE] {
-                Some("_NET_WM_STATE")
-            } else if atom == atoms[_NET_WM_USER_TIME] {
-                Some("_NET_WM_USER_TIME")
-            } else {
-                None
-            };
-            if let Some(name) = name {
-                eprintln!(
-                    "[modal-dbg] PropertyNotify win={} prop={} state={}",
-                    xev.window, name, xev.state
-                );
-            }
-        }
+        // る。ERGON_MODAL_DEBUG=1 で出力 (使うときはコメントを外す)。
+        // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+        //     let name = if atom == xproto::Atom::from(xproto::AtomEnum::WM_NORMAL_HINTS) {
+        //         Some("WM_NORMAL_HINTS")
+        //     } else if atom == atoms[_MOTIF_WM_HINTS] {
+        //         Some("_MOTIF_WM_HINTS")
+        //     } else if atom == atoms[_NET_FRAME_EXTENTS] {
+        //         Some("_NET_FRAME_EXTENTS")
+        //     } else if atom == atoms[WM_TRANSIENT_FOR] {
+        //         Some("WM_TRANSIENT_FOR")
+        //     } else if atom == atoms[_NET_WM_STATE] {
+        //         Some("_NET_WM_STATE")
+        //     } else if atom == atoms[_NET_WM_USER_TIME] {
+        //         Some("_NET_WM_USER_TIME")
+        //     } else {
+        //         None
+        //     };
+        //     if let Some(name) = name {
+        //         eprintln!(
+        //             "[modal-dbg] PropertyNotify win={} prop={} state={}",
+        //             xev.window, name, xev.state
+        //         );
+        //     }
+        // }
 
         if atom == xproto::Atom::from(xproto::AtomEnum::RESOURCE_MANAGER)
             || atom == atoms[_XSETTINGS_SETTINGS]

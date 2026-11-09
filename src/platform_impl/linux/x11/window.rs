@@ -440,21 +440,45 @@ impl UnownedWindow {
 
             // (診断) 生成時点の属性の記録。slint のアダプタ経由で resizable /
             // min_inner_size がどう届いているかを確認する。ERGON_MODAL_DEBUG=1
-            // で有効。
-            if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                eprintln!(
-                    "[modal-dbg] 生成時 attrs win={} resizable={} min={:?} max={:?} size={:?}",
-                    window.xwindow,
-                    window_attrs.resizable,
-                    window_attrs.min_inner_size,
-                    window_attrs.max_inner_size,
-                    window_attrs.inner_size
-                );
-            }
+            // で出力 (使うときはコメントを外す)。
+            // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+            //     eprintln!(
+            //         "[modal-dbg] 生成時 attrs win={} resizable={} min={:?} max={:?} size={:?}",
+            //         window.xwindow,
+            //         window_attrs.resizable,
+            //         window_attrs.min_inner_size,
+            //         window_attrs.max_inner_size,
+            //         window_attrs.inner_size
+            //     );
+            // }
 
             // X11: modal ダイアログ (x11_modal) はサイズ固定として扱う。生成
             // 属性の resizable がアダプタ経由で落ちていても、modal なら固定
             // サイズ (min=max=生成サイズ) で WM へのヒントを確定させる。
+            //
+            // (実機調査 v0.30.13-modal.13/14 で確定した因果 chain。Ubuntu +
+            // Mutter、ERGON_MODAL_DEBUG のログで確認)
+            //   1. slint のアダプタ (winitwindowadapter) はウィンドウ生成属性
+            //      を自前で組み立てるため、フックで指定した with_resizable(false)
+            //      が生成時の WM_NORMAL_HINTS に届かないことがある (実測: 生成
+            //      時 min=236x118 max=None = リサイズ可)。
+            //   2. slint はレイアウトの制約適用のたびに set_resizable(制約か
+            //      ら判定) と set_min_inner_size / set_max_inner_size を呼ぶ。
+            //      フォント計測が確定するまで min が段階的に変わる (236→240)
+            //      ので、マップ後も WM_NORMAL_HINTS の書き換えが続く。
+            //   3. アプリ側の「生成属性の再主張」も winit の is_visible() が
+            //      YesWait (マップ要求済み) を Some(false) で返すため、マップ
+            //      要求後に set_resizable(false) を発火しうる。
+            //   4. マップ後の WM_NORMAL_HINTS / _MOTIF_WM_HINTS 書き換えは
+            //      Mutter に再設定 (meta_window_reconfigure) を誘発し、装飾
+            //      (フレームのボーダー / タイトル高さ) を作り直す。クライア
+            //      ントはフレーム内で動き (実測: ConfigureNotify pos=(10,40)
+            //      → pos=(1,33)、直前に _NET_FRAME_EXTENTS 更新)、表示直後の
+            //      位置ずれとして見える。
+            //   → 対策: modal ウィンドウは生成時に min=max + MWM ヒントを書
+            //   いて凍結し、以後の set_resizable / set_min_max_inner_size /
+            //   request_inner_size を無視する (SharedState.modal_frozen)。
+            //   WM_NORMAL_HINTS はマップ前に 1 回だけ書かれる。
             let modal_frozen = window_attrs.x11_modal;
             let effective_resizable = window_attrs.resizable && !modal_frozen;
 
@@ -504,13 +528,13 @@ impl UnownedWindow {
 
             // (診断) 生成時のサイズ ヒントの記録。マップ後に WM_NORMAL_HINTS
             // が書き換わっていないか (update_normal_hints のログ) と突き合
-            // わせる。ERGON_MODAL_DEBUG=1 で有効。
-            if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                eprintln!(
-                    "[modal-dbg] 生成時に WM_NORMAL_HINTS win={} min={:?} max={:?}",
-                    window.xwindow, normal_hints.min_size, normal_hints.max_size
-                );
-            }
+            // わせる。ERGON_MODAL_DEBUG=1 で出力 (使うときはコメントを外す)。
+            // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+            //     eprintln!(
+            //         "[modal-dbg] 生成時に WM_NORMAL_HINTS win={} min={:?} max={:?}",
+            //         window.xwindow, normal_hints.min_size, normal_hints.max_size
+            //     );
+            // }
 
             // X11: リサイズ不可のウィンドウは _MOTIF_WM_HINTS も生成時に書き
             // 込む (実行時 set_resizable(false) と同じ内容: 最小化 / 最大化
@@ -603,12 +627,12 @@ impl UnownedWindow {
             let last_ts = xconn.timestamp();
             if last_ts != 0 {
                 // (診断コード・コメントアウト) 焼き込み値の確認用。
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                     eprintln!(
-                         "[modal-dbg] winit 生成時に user time 焼き込み win={} t={}",
-                         window.xwindow, last_ts
-                     );
-                }
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //      eprintln!(
+                //          "[modal-dbg] winit 生成時に user time 焼き込み win={} t={}",
+                //          window.xwindow, last_ts
+                //      );
+                // }
                 leap!(xconn.xcb_connection().change_property(
                     xproto::PropMode::REPLACE,
                     window.xwindow,
@@ -624,9 +648,9 @@ impl UnownedWindow {
             // Set visibility (map window)
             if window_attrs.visible {
                 // (診断コード・コメントアウト) 生成時マップの確認用。
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                     eprintln!("[modal-dbg] winit 生成時にマップ win={}", window.xwindow);
-                }
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //      eprintln!("[modal-dbg] winit 生成時にマップ win={}", window.xwindow);
+                // }
                 leap!(xconn.xcb_connection().map_window(window.xwindow)).ignore_error();
                 leap!(xconn.xcb_connection().configure_window(
                     xwindow,
@@ -957,12 +981,12 @@ impl UnownedWindow {
             Visibility::No => {
                 // (診断コード・コメントアウト) 非表示扱いの窓への VisibilityNotify
                 // で unmap する経路の確認用。ERGON_MODAL_DEBUG=1 で出力していた。
-                if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-                     eprintln!(
-                         "[modal-dbg] winit visibility_notify: 状態 No → unmap win={}",
-                         self.xwindow
-                     );
-                }
+                // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                //      eprintln!(
+                //          "[modal-dbg] winit visibility_notify: 状態 No → unmap win={}",
+                //          self.xwindow
+                //      );
+                // }
                 self.xconn
                     .xcb_connection()
                     .unmap_window(self.xwindow)
@@ -1331,12 +1355,12 @@ impl UnownedWindow {
         let mut shared_state = self.shared_state_lock();
         // (診断コード・コメントアウト) マップ / アンマップの呼び出し経路の切
         // り分け用。ERGON_MODAL_DEBUG=1 で出力していた。
-        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-             eprintln!(
-                 "[modal-dbg] winit set_visible({visible}) win={} state={:?}",
-                 self.xwindow, shared_state.visibility
-             );
-        }
+        // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+        //      eprintln!(
+        //          "[modal-dbg] winit set_visible({visible}) win={} state={:?}",
+        //          self.xwindow, shared_state.visibility
+        //      );
+        // }
 
         match (visible, shared_state.visibility) {
             (true, Visibility::Yes) | (true, Visibility::YesWait) | (false, Visibility::No) => {
@@ -1531,17 +1555,17 @@ impl UnownedWindow {
         // (診断) マップ後の WM_NORMAL_HINTS 書き換えは Mutter に再設定
         // (meta_window_reconfigure) を誘発し、装飾 / 位置の再計算 → 表示後
         // のずれの原因になりうる。書き換えの内容と呼び出し元を特定するた
-        // めに記録する。ERGON_MODAL_DEBUG=1 で有効。
-        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
-            eprintln!(
-                "[modal-dbg] update_normal_hints win={} min={:?} max={:?} base={:?} inc={:?}",
-                self.xwindow,
-                normal_hints.min_size,
-                normal_hints.max_size,
-                normal_hints.base_size,
-                normal_hints.size_increment
-            );
-        }
+        // めに記録する。ERGON_MODAL_DEBUG=1 で出力 (使うときはコメントを外す)。
+        // if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+        //     eprintln!(
+        //         "[modal-dbg] update_normal_hints win={} min={:?} max={:?} base={:?} inc={:?}",
+        //         self.xwindow,
+        //         normal_hints.min_size,
+        //         normal_hints.max_size,
+        //         normal_hints.base_size,
+        //         normal_hints.size_increment
+        //     );
+        // }
         normal_hints
             .set(
                 self.xconn.xcb_connection(),
@@ -1651,7 +1675,8 @@ impl UnownedWindow {
         // (X11) modal ダイアログはサイズ固定で凍結済み。以後の変更要求 (slint
         // の制約適用の set_resizable(true) やアプリの再主張) は WM_NORMAL_
         // HINTS / _MOTIF_WM_HINTS のマップ後書き換え = WM の再装飾 = 位置ず
-        // れになるため無視する。
+        // れになるため無視する。因果 chain の詳細は create_window の
+        // modal_frozen の説明を参照 (実機調査 v0.30.13-modal.13/14)。
         if self.shared_state_lock().modal_frozen {
             return;
         }
