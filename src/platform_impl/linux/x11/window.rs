@@ -45,6 +45,15 @@ pub struct SharedState {
     pub inner_position: Option<(i32, i32)>,
     pub inner_position_rel_parent: Option<(i32, i32)>,
     pub is_resizable: bool,
+    // X11: modal ダイアログ (x11_modal 生成属性あり) はサイズ固定として凍結
+    // する。slint はレイアウトの制約適用のたびに set_resizable /
+    // set_min_inner_size / set_max_inner_size を呼び、マップ後の
+    // WM_NORMAL_HINTS / _MOTIF_WM_HINTS 書き換えは WM に再装飾 (フレームの
+    // 枠 / タイトル高さの再計算) を誘発してクライアントがフレーム内で動き、
+    // 表示直後の位置ずれになる (実測: ConfigureNotify pos=(10,40) →
+    // pos=(1,33) → _NET_FRAME_EXTENTS 更新)。生成時に確定したヒントを凍結
+    // し、以後の変更要求を無視する。
+    pub modal_frozen: bool,
     pub is_decorated: bool,
     pub last_monitor: X11MonitorHandle,
     pub dpi_adjusted: Option<(u32, u32)>,
@@ -79,11 +88,14 @@ impl SharedState {
         let visibility =
             if window_attributes.visible { Visibility::YesWait } else { Visibility::No };
 
+        let modal_frozen = window_attributes.x11_modal;
+
         Mutex::new(SharedState {
             last_monitor,
             visibility,
 
-            is_resizable: window_attributes.resizable,
+            is_resizable: window_attributes.resizable && !modal_frozen,
+            modal_frozen,
             is_decorated: window_attributes.decorations,
             cursor_pos: None,
             size: None,
@@ -426,7 +438,27 @@ impl UnownedWindow {
             let mut max_inner_size =
                 window_attrs.max_inner_size.map(|size| size.to_physical::<u32>(scale_factor));
 
-            if !window_attrs.resizable {
+            // (診断) 生成時点の属性の記録。slint のアダプタ経由で resizable /
+            // min_inner_size がどう届いているかを確認する。ERGON_MODAL_DEBUG=1
+            // で有効。
+            if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                eprintln!(
+                    "[modal-dbg] 生成時 attrs win={} resizable={} min={:?} max={:?} size={:?}",
+                    window.xwindow,
+                    window_attrs.resizable,
+                    window_attrs.min_inner_size,
+                    window_attrs.max_inner_size,
+                    window_attrs.inner_size
+                );
+            }
+
+            // X11: modal ダイアログ (x11_modal) はサイズ固定として扱う。生成
+            // 属性の resizable がアダプタ経由で落ちていても、modal なら固定
+            // サイズ (min=max=生成サイズ) で WM へのヒントを確定させる。
+            let modal_frozen = window_attrs.x11_modal;
+            let effective_resizable = window_attrs.resizable && !modal_frozen;
+
+            if !effective_resizable {
                 if util::wm_name_is_one_of(&["Xfwm4"]) {
                     warn!("To avoid a WM bug, disabling resizing has no effect on Xfwm4");
                 } else {
@@ -478,6 +510,19 @@ impl UnownedWindow {
                     "[modal-dbg] 生成時に WM_NORMAL_HINTS win={} min={:?} max={:?}",
                     window.xwindow, normal_hints.min_size, normal_hints.max_size
                 );
+            }
+
+            // X11: リサイズ不可のウィンドウは _MOTIF_WM_HINTS も生成時に書き
+            // 込む (実行時 set_resizable(false) と同じ内容: 最小化 / 最大化
+            // ボタンを落とす)。WM は管理開始時に装飾を確定できる。マップ後の
+            // MWM ヒント変更は再装飾 = フレーム内でのクライアント移動 = 位置
+            // ずれの原因 (実測)。
+            if !effective_resizable && window_attrs.decorations {
+                let mut hints = xconn.get_motif_hints(window.xwindow);
+                hints.set_buttons(hint::mwm_decor_without_min_max());
+                xconn
+                    .set_motif_hints(window.xwindow, &hints)
+                    .expect_then_ignore_error("Failed to set motif hints");
             }
 
             // Set window icons
@@ -1452,6 +1497,11 @@ impl UnownedWindow {
 
     #[inline]
     pub fn request_inner_size(&self, size: Size) -> Option<PhysicalSize<u32>> {
+        // (X11) modal ダイアログはサイズ固定で凍結中。生成サイズで確定済みな
+        // ので、以後のサイズ要求 (slint の制約適用など) を無視する。
+        if self.shared_state_lock().modal_frozen {
+            return None;
+        }
         let scale_factor = self.scale_factor();
         let size = size.to_physical::<u32>(scale_factor).into();
         if !self.shared_state_lock().is_resizable {
@@ -1512,6 +1562,12 @@ impl UnownedWindow {
 
     #[inline]
     pub fn set_min_inner_size(&self, dimensions: Option<Size>) {
+        // (X11) modal ダイアログはヒント凍結中。slint の制約適用によるフォン
+        // ト計測の段階的な min 変更をマップ後にヒントへ書かない (WM の再装飾
+        // = 位置ずれの原因)。
+        if self.shared_state_lock().modal_frozen {
+            return;
+        }
         self.shared_state_lock().min_inner_size = dimensions;
         let physical_dimensions =
             dimensions.map(|dimensions| dimensions.to_physical::<u32>(self.scale_factor()).into());
@@ -1528,6 +1584,11 @@ impl UnownedWindow {
 
     #[inline]
     pub fn set_max_inner_size(&self, dimensions: Option<Size>) {
+        // (X11) modal ダイアログはヒント凍結中 (set_min_inner_size と同じ理
+        // 由)。
+        if self.shared_state_lock().modal_frozen {
+            return;
+        }
         self.shared_state_lock().max_inner_size = dimensions;
         let physical_dimensions =
             dimensions.map(|dimensions| dimensions.to_physical::<u32>(self.scale_factor()).into());
@@ -1587,6 +1648,13 @@ impl UnownedWindow {
     }
 
     pub fn set_resizable(&self, resizable: bool) {
+        // (X11) modal ダイアログはサイズ固定で凍結済み。以後の変更要求 (slint
+        // の制約適用の set_resizable(true) やアプリの再主張) は WM_NORMAL_
+        // HINTS / _MOTIF_WM_HINTS のマップ後書き換え = WM の再装飾 = 位置ず
+        // れになるため無視する。
+        if self.shared_state_lock().modal_frozen {
+            return;
+        }
         if util::wm_name_is_one_of(&["Xfwm4"]) {
             // Making the window unresizable on Xfwm prevents further changes to `WM_NORMAL_HINTS`
             // from being detected. This makes it impossible for resizing to be
