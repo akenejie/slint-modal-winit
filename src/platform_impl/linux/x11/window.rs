@@ -470,6 +470,16 @@ impl UnownedWindow {
             ))
             .check());
 
+            // (診断) 生成時のサイズ ヒントの記録。マップ後に WM_NORMAL_HINTS
+            // が書き換わっていないか (update_normal_hints のログ) と突き合
+            // わせる。ERGON_MODAL_DEBUG=1 で有効。
+            if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+                eprintln!(
+                    "[modal-dbg] 生成時に WM_NORMAL_HINTS win={} min={:?} max={:?}",
+                    window.xwindow, normal_hints.min_size, normal_hints.max_size
+                );
+            }
+
             // Set window icons
             if let Some(icon) = window_attrs.window_icon {
                 leap!(window.set_icon_inner(icon.inner)).ignore_error();
@@ -1468,6 +1478,20 @@ impl UnownedWindow {
         .reply()?
         .unwrap_or_default();
         callback(&mut normal_hints);
+        // (診断) マップ後の WM_NORMAL_HINTS 書き換えは Mutter に再設定
+        // (meta_window_reconfigure) を誘発し、装飾 / 位置の再計算 → 表示後
+        // のずれの原因になりうる。書き換えの内容と呼び出し元を特定するた
+        // めに記録する。ERGON_MODAL_DEBUG=1 で有効。
+        if std::env::var("ERGON_MODAL_DEBUG").is_ok() {
+            eprintln!(
+                "[modal-dbg] update_normal_hints win={} min={:?} max={:?} base={:?} inc={:?}",
+                self.xwindow,
+                normal_hints.min_size,
+                normal_hints.max_size,
+                normal_hints.base_size,
+                normal_hints.size_increment
+            );
+        }
         normal_hints
             .set(
                 self.xconn.xcb_connection(),
