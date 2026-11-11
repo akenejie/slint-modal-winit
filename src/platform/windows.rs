@@ -183,9 +183,9 @@ pub trait EventLoopBuilderExtWindows {
     /// Disable process-wide DPI awareness.
     ///
     /// ```
-    /// use winit::event_loop::EventLoopBuilder;
+    /// use slint-modal-winit::event_loop::EventLoopBuilder;
     /// #[cfg(target_os = "windows")]
-    /// use winit::platform::windows::EventLoopBuilderExtWindows;
+    /// use slint-modal-winit::platform::windows::EventLoopBuilderExtWindows;
     ///
     /// let mut builder = EventLoopBuilder::new();
     /// #[cfg(target_os = "windows")]
@@ -203,9 +203,9 @@ pub trait EventLoopBuilderExtWindows {
     ///
     /// ```
     /// # use windows_sys::Win32::UI::WindowsAndMessaging::{ACCEL, CreateAcceleratorTableW, TranslateAcceleratorW, DispatchMessageW, TranslateMessage, MSG};
-    /// use winit::event_loop::EventLoopBuilder;
+    /// use slint-modal-winit::event_loop::EventLoopBuilder;
     /// #[cfg(target_os = "windows")]
-    /// use winit::platform::windows::EventLoopBuilderExtWindows;
+    /// use slint-modal-winit::platform::windows::EventLoopBuilderExtWindows;
     ///
     /// let mut builder = EventLoopBuilder::new();
     /// #[cfg(target_os = "windows")]
@@ -334,11 +334,11 @@ pub trait WindowExtWindows {
     /// ## Example
     ///
     /// ```no_run
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: Window) {
     /// use std::thread;
-    /// use winit::platform::windows::WindowExtWindows;
-    /// use winit::raw_window_handle::HasWindowHandle;
+    /// use slint-modal-winit::platform::windows::WindowExtWindows;
+    /// use slint-modal-winit::raw_window_handle::HasWindowHandle;
     ///
     /// // We can get the window handle on the current thread.
     /// let handle = window.window_handle().unwrap();
@@ -748,8 +748,8 @@ pub trait IconExtWindows: Sized {
     /// [`from_resource`]: IconExtWindows::from_resource
     ///
     /// ```rust,no_run
-    /// use winit::platform::windows::IconExtWindows;
-    /// use winit::window::Icon;
+    /// use slint-modal-winit::platform::windows::IconExtWindows;
+    /// use slint-modal-winit::window::Icon;
     ///
     /// assert!(Icon::from_resource_name("app", None).is_ok());
     /// assert!(Icon::from_resource(1, None).is_ok());
@@ -764,8 +764,8 @@ pub trait IconExtWindows: Sized {
     /// [`from_resource`]: IconExtWindows::from_resource
     ///
     /// ```rust,no_run
-    /// # use winit::platform::windows::IconExtWindows;
-    /// # use winit::window::Icon;
+    /// # use slint-modal-winit::platform::windows::IconExtWindows;
+    /// # use slint-modal-winit::window::Icon;
     /// assert!(Icon::from_resource_name("0", None).is_ok());
     /// assert!(Icon::from_resource(0, None).is_err());
     /// ```

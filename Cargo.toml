@@ -56,7 +56,7 @@ targets = [
 ]
 rustdoc-args = ["--cfg", "docsrs"]
 
-# Features are documented in either `lib.rs` or under `winit::platform`.
+# Features are documented in either `lib.rs` or under `slint-modal-winit::platform`.
 [features]
 default = ["rwh_06", "x11", "wayland", "wayland-dlopen", "wayland-csd-adwaita"]
 x11 = ["x11-dl", "bytemuck", "percent-encoding", "xkbcommon-dl/x11", "x11rb"]
@@ -106,7 +106,7 @@ tracing = { version = "0.1.40", default-features = false }
 image = { version = "0.25.0", default-features = false, features = ["png"] }
 tracing = { version = "0.1.40", default-features = false, features = ["log"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-winit = { path = ".", features = ["rwh_05"] }
+slint-modal-winit = { path = ".", features = ["rwh_05"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dev-dependencies]
 softbuffer = { version = "0.4.0", default-features = false, features = [

@@ -522,7 +522,7 @@ impl Window {
     /// Returns an identifier unique to the window.
     #[inline]
     pub fn id(&self) -> WindowId {
-        let _span = tracing::debug_span!("winit::Window::id",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::id",).entered();
 
         self.window.maybe_wait_on_main(|w| WindowId(w.id()))
     }
@@ -590,7 +590,7 @@ impl Window {
     /// [`contentScaleFactor`]: https://developer.apple.com/documentation/uikit/uiview/1622657-contentscalefactor?language=objc
     #[inline]
     pub fn scale_factor(&self) -> f64 {
-        let _span = tracing::debug_span!("winit::Window::scale_factor",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::scale_factor",).entered();
 
         self.window.maybe_wait_on_main(|w| w.scale_factor())
     }
@@ -624,7 +624,7 @@ impl Window {
     /// [`WindowEvent::RedrawRequested`]: crate::event::WindowEvent::RedrawRequested
     #[inline]
     pub fn request_redraw(&self) {
-        let _span = tracing::debug_span!("winit::Window::request_redraw",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::request_redraw",).entered();
 
         self.window.maybe_queue_on_main(|w| w.request_redraw())
     }
@@ -642,7 +642,7 @@ impl Window {
     /// APIs and software rendering.
     ///
     /// ```no_run
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::window::Window;
     /// # fn swap_buffers() {}
     /// # fn scope(window: &Window) {
     /// // Do the actual drawing with OpenGL.
@@ -663,7 +663,7 @@ impl Window {
     /// [`WindowEvent::RedrawRequested`]: crate::event::WindowEvent::RedrawRequested
     #[inline]
     pub fn pre_present_notify(&self) {
-        let _span = tracing::debug_span!("winit::Window::pre_present_notify",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::pre_present_notify",).entered();
 
         self.window.maybe_queue_on_main(|w| w.pre_present_notify());
     }
@@ -681,7 +681,7 @@ impl Window {
     // at least, then this function should be provided through a platform specific
     // extension trait
     pub fn reset_dead_keys(&self) {
-        let _span = tracing::debug_span!("winit::Window::reset_dead_keys",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::reset_dead_keys",).entered();
 
         self.window.maybe_queue_on_main(|w| w.reset_dead_keys())
     }
@@ -705,7 +705,7 @@ impl Window {
     /// [safe area]: https://developer.apple.com/documentation/uikit/uiview/2891103-safeareainsets?language=objc
     #[inline]
     pub fn inner_position(&self) -> Result<PhysicalPosition<i32>, NotSupportedError> {
-        let _span = tracing::debug_span!("winit::Window::inner_position",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::inner_position",).entered();
 
         self.window.maybe_wait_on_main(|w| w.inner_position())
     }
@@ -728,7 +728,7 @@ impl Window {
     /// - **Android / Wayland:** Always returns [`NotSupportedError`].
     #[inline]
     pub fn outer_position(&self) -> Result<PhysicalPosition<i32>, NotSupportedError> {
-        let _span = tracing::debug_span!("winit::Window::outer_position",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::outer_position",).entered();
 
         self.window.maybe_wait_on_main(|w| w.outer_position())
     }
@@ -739,8 +739,8 @@ impl Window {
     /// This automatically un-maximizes the window if it's maximized.
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalPosition, PhysicalPosition};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalPosition, PhysicalPosition};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the position in logical dimensions like this:
     /// window.set_outer_position(LogicalPosition::new(400.0, 200.0));
@@ -763,7 +763,7 @@ impl Window {
     pub fn set_outer_position<P: Into<Position>>(&self, position: P) {
         let position = position.into();
         let _span = tracing::debug_span!(
-            "winit::Window::set_outer_position",
+            "slint-modal-winit::Window::set_outer_position",
             position = ?position
         )
         .entered();
@@ -785,7 +785,7 @@ impl Window {
     /// [`transform`]: https://developer.mozilla.org/en-US/docs/Web/CSS/transform
     #[inline]
     pub fn inner_size(&self) -> PhysicalSize<u32> {
-        let _span = tracing::debug_span!("winit::Window::inner_size",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::inner_size",).entered();
 
         self.window.maybe_wait_on_main(|w| w.inner_size())
     }
@@ -807,8 +807,8 @@ impl Window {
     /// The request could automatically un-maximize the window if it's maximized.
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalSize, PhysicalSize};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalSize, PhysicalSize};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the size in logical dimensions like this:
     /// let _ = window.request_inner_size(LogicalSize::new(400.0, 200.0));
@@ -829,7 +829,7 @@ impl Window {
     pub fn request_inner_size<S: Into<Size>>(&self, size: S) -> Option<PhysicalSize<u32>> {
         let size = size.into();
         let _span = tracing::debug_span!(
-            "winit::Window::request_inner_size",
+            "slint-modal-winit::Window::request_inner_size",
             size = ?size
         )
         .entered();
@@ -849,15 +849,15 @@ impl Window {
     ///   [`Window::inner_size`]._
     #[inline]
     pub fn outer_size(&self) -> PhysicalSize<u32> {
-        let _span = tracing::debug_span!("winit::Window::outer_size",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::outer_size",).entered();
         self.window.maybe_wait_on_main(|w| w.outer_size())
     }
 
     /// Sets a minimum dimension size for the window.
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalSize, PhysicalSize};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalSize, PhysicalSize};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the size in logical dimensions like this:
     /// window.set_min_inner_size(Some(LogicalSize::new(400.0, 200.0)));
@@ -874,7 +874,7 @@ impl Window {
     pub fn set_min_inner_size<S: Into<Size>>(&self, min_size: Option<S>) {
         let min_size = min_size.map(|s| s.into());
         let _span = tracing::debug_span!(
-            "winit::Window::set_min_inner_size",
+            "slint-modal-winit::Window::set_min_inner_size",
             min_size = ?min_size
         )
         .entered();
@@ -884,8 +884,8 @@ impl Window {
     /// Sets a maximum dimension size for the window.
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalSize, PhysicalSize};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalSize, PhysicalSize};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the size in logical dimensions like this:
     /// window.set_max_inner_size(Some(LogicalSize::new(400.0, 200.0)));
@@ -902,7 +902,7 @@ impl Window {
     pub fn set_max_inner_size<S: Into<Size>>(&self, max_size: Option<S>) {
         let max_size = max_size.map(|s| s.into());
         let _span = tracing::debug_span!(
-            "winit::Window::max_size",
+            "slint-modal-winit::Window::max_size",
             max_size = ?max_size
         )
         .entered();
@@ -916,7 +916,7 @@ impl Window {
     /// - **iOS / Android / Web / Orbital:** Always returns [`None`].
     #[inline]
     pub fn resize_increments(&self) -> Option<PhysicalSize<u32>> {
-        let _span = tracing::debug_span!("winit::Window::resize_increments",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::resize_increments",).entered();
         self.window.maybe_wait_on_main(|w| w.resize_increments())
     }
 
@@ -934,7 +934,7 @@ impl Window {
     pub fn set_resize_increments<S: Into<Size>>(&self, increments: Option<S>) {
         let increments = increments.map(Into::into);
         let _span = tracing::debug_span!(
-            "winit::Window::set_resize_increments",
+            "slint-modal-winit::Window::set_resize_increments",
             increments = ?increments
         )
         .entered();
@@ -951,7 +951,7 @@ impl Window {
     /// - **iOS / Android:** Unsupported.
     #[inline]
     pub fn set_title(&self, title: &str) {
-        let _span = tracing::debug_span!("winit::Window::set_title", title).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_title", title).entered();
         self.window.maybe_wait_on_main(|w| w.set_title(title))
     }
 
@@ -972,7 +972,7 @@ impl Window {
     ///   [`WindowAttributes::with_transparent`].
     #[inline]
     pub fn set_transparent(&self, transparent: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_transparent", transparent).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_transparent", transparent).entered();
         self.window.maybe_queue_on_main(move |w| w.set_transparent(transparent))
     }
 
@@ -986,7 +986,7 @@ impl Window {
     /// - **Wayland:** Only works with org_kde_kwin_blur_manager protocol.
     #[inline]
     pub fn set_blur(&self, blur: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_blur", blur).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_blur", blur).entered();
         self.window.maybe_queue_on_main(move |w| w.set_blur(blur))
     }
 
@@ -1000,7 +1000,7 @@ impl Window {
     /// - **iOS:** Can only be called on the main thread.
     #[inline]
     pub fn set_visible(&self, visible: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_visible", visible).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_visible", visible).entered();
         self.window.maybe_queue_on_main(move |w| w.set_visible(visible))
     }
 
@@ -1015,7 +1015,7 @@ impl Window {
     /// - **Wayland / iOS / Android / Web:** Unsupported.
     #[inline]
     pub fn is_visible(&self) -> Option<bool> {
-        let _span = tracing::debug_span!("winit::Window::is_visible",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::is_visible",).entered();
         self.window.maybe_wait_on_main(|w| w.is_visible())
     }
 
@@ -1036,7 +1036,7 @@ impl Window {
     /// [`WindowEvent::Resized`]: crate::event::WindowEvent::Resized
     #[inline]
     pub fn set_resizable(&self, resizable: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_resizable", resizable).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_resizable", resizable).entered();
         self.window.maybe_queue_on_main(move |w| w.set_resizable(resizable))
     }
 
@@ -1048,7 +1048,7 @@ impl Window {
     /// - **iOS / Android / Web:** Unsupported.
     #[inline]
     pub fn is_resizable(&self) -> bool {
-        let _span = tracing::debug_span!("winit::Window::is_resizable",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::is_resizable",).entered();
         self.window.maybe_wait_on_main(|w| w.is_resizable())
     }
 
@@ -1060,7 +1060,7 @@ impl Window {
     /// - **Web / iOS / Android:** Unsupported.
     pub fn set_enabled_buttons(&self, buttons: WindowButtons) {
         let _span = tracing::debug_span!(
-            "winit::Window::set_enabled_buttons",
+            "slint-modal-winit::Window::set_enabled_buttons",
             buttons = ?buttons
         )
         .entered();
@@ -1074,7 +1074,7 @@ impl Window {
     /// - **Wayland / X11 / Orbital:** Not implemented. Always returns [`WindowButtons::all`].
     /// - **Web / iOS / Android:** Unsupported. Always returns [`WindowButtons::all`].
     pub fn enabled_buttons(&self) -> WindowButtons {
-        let _span = tracing::debug_span!("winit::Window::enabled_buttons",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::enabled_buttons",).entered();
         self.window.maybe_wait_on_main(|w| w.enabled_buttons())
     }
 
@@ -1086,7 +1086,7 @@ impl Window {
     /// - **Wayland:** Un-minimize is unsupported.
     #[inline]
     pub fn set_minimized(&self, minimized: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_minimized", minimized).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_minimized", minimized).entered();
         self.window.maybe_queue_on_main(move |w| w.set_minimized(minimized))
     }
 
@@ -1104,7 +1104,7 @@ impl Window {
     /// - **iOS / Android / Web / Orbital:** Unsupported.
     #[inline]
     pub fn is_minimized(&self) -> Option<bool> {
-        let _span = tracing::debug_span!("winit::Window::is_minimized",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::is_minimized",).entered();
         self.window.maybe_wait_on_main(|w| w.is_minimized())
     }
 
@@ -1115,7 +1115,7 @@ impl Window {
     /// - **iOS / Android / Web:** Unsupported.
     #[inline]
     pub fn set_maximized(&self, maximized: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_maximized", maximized).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_maximized", maximized).entered();
         self.window.maybe_queue_on_main(move |w| w.set_maximized(maximized))
     }
 
@@ -1126,7 +1126,7 @@ impl Window {
     /// - **iOS / Android / Web:** Unsupported.
     #[inline]
     pub fn is_maximized(&self) -> bool {
-        let _span = tracing::debug_span!("winit::Window::is_maximized",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::is_maximized",).entered();
         self.window.maybe_wait_on_main(|w| w.is_maximized())
     }
 
@@ -1155,7 +1155,7 @@ impl Window {
     #[inline]
     pub fn set_fullscreen(&self, fullscreen: Option<Fullscreen>) {
         let _span = tracing::debug_span!(
-            "winit::Window::set_fullscreen",
+            "slint-modal-winit::Window::set_fullscreen",
             fullscreen = ?fullscreen
         )
         .entered();
@@ -1172,7 +1172,7 @@ impl Window {
     /// - **Web:** Can only return `None` or `Borderless(None)`.
     #[inline]
     pub fn fullscreen(&self) -> Option<Fullscreen> {
-        let _span = tracing::debug_span!("winit::Window::fullscreen",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::fullscreen",).entered();
         self.window.maybe_wait_on_main(|w| w.fullscreen().map(|f| f.into()))
     }
 
@@ -1187,7 +1187,7 @@ impl Window {
     /// - **iOS / Android / Web:** No effect.
     #[inline]
     pub fn set_decorations(&self, decorations: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_decorations", decorations).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_decorations", decorations).entered();
         self.window.maybe_queue_on_main(move |w| w.set_decorations(decorations))
     }
 
@@ -1201,7 +1201,7 @@ impl Window {
     /// - **iOS / Android / Web:** Always returns `true`.
     #[inline]
     pub fn is_decorated(&self) -> bool {
-        let _span = tracing::debug_span!("winit::Window::is_decorated",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::is_decorated",).entered();
         self.window.maybe_wait_on_main(|w| w.is_decorated())
     }
 
@@ -1212,7 +1212,7 @@ impl Window {
     /// See [`WindowLevel`] for details.
     pub fn set_window_level(&self, level: WindowLevel) {
         let _span = tracing::debug_span!(
-            "winit::Window::set_window_level",
+            "slint-modal-winit::Window::set_window_level",
             level = ?level
         )
         .entered();
@@ -1270,7 +1270,7 @@ impl Window {
     ///   That said, it's usually in the same ballpark as on Windows.
     #[inline]
     pub fn set_window_icon(&self, window_icon: Option<Icon>) {
-        let _span = tracing::debug_span!("winit::Window::set_window_icon",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_window_icon",).entered();
         self.window.maybe_queue_on_main(move |w| w.set_window_icon(window_icon))
     }
 
@@ -1290,8 +1290,8 @@ impl Window {
     /// ## Example
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalPosition, PhysicalPosition, LogicalSize, PhysicalSize};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalPosition, PhysicalPosition, LogicalSize, PhysicalSize};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the position in logical dimensions like this:
     /// window.set_ime_cursor_area(LogicalPosition::new(400.0, 200.0), LogicalSize::new(100, 100));
@@ -1313,7 +1313,7 @@ impl Window {
         let position = position.into();
         let size = size.into();
         let _span = tracing::debug_span!(
-            "winit::Window::set_ime_cursor_area",
+            "slint-modal-winit::Window::set_ime_cursor_area",
             position = ?position,
             size = ?size,
         )
@@ -1345,7 +1345,7 @@ impl Window {
     /// [`KeyboardInput`]: crate::event::WindowEvent::KeyboardInput
     #[inline]
     pub fn set_ime_allowed(&self, allowed: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_ime_allowed", allowed).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_ime_allowed", allowed).entered();
         self.window.maybe_queue_on_main(move |w| w.set_ime_allowed(allowed))
     }
 
@@ -1357,7 +1357,7 @@ impl Window {
     #[inline]
     pub fn set_ime_purpose(&self, purpose: ImePurpose) {
         let _span = tracing::debug_span!(
-            "winit::Window::set_ime_purpose",
+            "slint-modal-winit::Window::set_ime_purpose",
             purpose = ?purpose
         )
         .entered();
@@ -1376,7 +1376,7 @@ impl Window {
     /// - **iOS / Android / Wayland / Orbital:** Unsupported.
     #[inline]
     pub fn focus_window(&self) {
-        let _span = tracing::debug_span!("winit::Window::focus_window",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::focus_window",).entered();
         self.window.maybe_queue_on_main(|w| w.focus_window())
     }
 
@@ -1387,7 +1387,7 @@ impl Window {
     /// [`WindowEvent::Focused`]: crate::event::WindowEvent::Focused
     #[inline]
     pub fn has_focus(&self) -> bool {
-        let _span = tracing::debug_span!("winit::Window::has_focus",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::has_focus",).entered();
         self.window.maybe_wait_on_main(|w| w.has_focus())
     }
 
@@ -1407,7 +1407,7 @@ impl Window {
     #[inline]
     pub fn request_user_attention(&self, request_type: Option<UserAttentionType>) {
         let _span = tracing::debug_span!(
-            "winit::Window::request_user_attention",
+            "slint-modal-winit::Window::request_user_attention",
             request_type = ?request_type
         )
         .entered();
@@ -1428,7 +1428,7 @@ impl Window {
     #[inline]
     pub fn set_theme(&self, theme: Option<Theme>) {
         let _span = tracing::debug_span!(
-            "winit::Window::set_theme",
+            "slint-modal-winit::Window::set_theme",
             theme = ?theme
         )
         .entered();
@@ -1445,7 +1445,7 @@ impl Window {
     /// - **Wayland:** Only returns theme overrides.
     #[inline]
     pub fn theme(&self) -> Option<Theme> {
-        let _span = tracing::debug_span!("winit::Window::theme",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::theme",).entered();
         self.window.maybe_wait_on_main(|w| w.theme())
     }
 
@@ -1460,7 +1460,7 @@ impl Window {
     /// [`NSWindowSharingNone`]: https://developer.apple.com/documentation/appkit/nswindowsharingtype/nswindowsharingnone
     pub fn set_content_protected(&self, protected: bool) {
         let _span =
-            tracing::debug_span!("winit::Window::set_content_protected", protected).entered();
+            tracing::debug_span!("slint-modal-winit::Window::set_content_protected", protected).entered();
         self.window.maybe_queue_on_main(move |w| w.set_content_protected(protected))
     }
 
@@ -1471,7 +1471,7 @@ impl Window {
     /// - **iOS / Android / x11 / Wayland / Web:** Unsupported. Always returns an empty string.
     #[inline]
     pub fn title(&self) -> String {
-        let _span = tracing::debug_span!("winit::Window::title",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::title",).entered();
         self.window.maybe_wait_on_main(|w| w.title())
     }
 }
@@ -1488,7 +1488,7 @@ impl Window {
     #[inline]
     pub fn set_cursor(&self, cursor: impl Into<Cursor>) {
         let cursor = cursor.into();
-        let _span = tracing::debug_span!("winit::Window::set_cursor",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_cursor",).entered();
         self.window.maybe_queue_on_main(move |w| w.set_cursor(cursor))
     }
 
@@ -1502,8 +1502,8 @@ impl Window {
     /// Changes the position of the cursor in window coordinates.
     ///
     /// ```no_run
-    /// # use winit::dpi::{LogicalPosition, PhysicalPosition};
-    /// # use winit::window::Window;
+    /// # use slint-modal-winit::dpi::{LogicalPosition, PhysicalPosition};
+    /// # use slint-modal-winit::window::Window;
     /// # fn scope(window: &Window) {
     /// // Specify the position in logical dimensions like this:
     /// window.set_cursor_position(LogicalPosition::new(400.0, 200.0));
@@ -1521,7 +1521,7 @@ impl Window {
     pub fn set_cursor_position<P: Into<Position>>(&self, position: P) -> Result<(), ExternalError> {
         let position = position.into();
         let _span = tracing::debug_span!(
-            "winit::Window::set_cursor_position",
+            "slint-modal-winit::Window::set_cursor_position",
             position = ?position
         )
         .entered();
@@ -1535,7 +1535,7 @@ impl Window {
     /// First try confining the cursor, and if that fails, try locking it instead.
     ///
     /// ```no_run
-    /// # use winit::window::{CursorGrabMode, Window};
+    /// # use slint-modal-winit::window::{CursorGrabMode, Window};
     /// # fn scope(window: &Window) {
     /// window
     ///     .set_cursor_grab(CursorGrabMode::Confined)
@@ -1546,7 +1546,7 @@ impl Window {
     #[inline]
     pub fn set_cursor_grab(&self, mode: CursorGrabMode) -> Result<(), ExternalError> {
         let _span = tracing::debug_span!(
-            "winit::Window::set_cursor_grab",
+            "slint-modal-winit::Window::set_cursor_grab",
             mode = ?mode
         )
         .entered();
@@ -1567,7 +1567,7 @@ impl Window {
     /// - **iOS / Android:** Unsupported.
     #[inline]
     pub fn set_cursor_visible(&self, visible: bool) {
-        let _span = tracing::debug_span!("winit::Window::set_cursor_visible", visible).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_cursor_visible", visible).entered();
         self.window.maybe_queue_on_main(move |w| w.set_cursor_visible(visible))
     }
 
@@ -1584,7 +1584,7 @@ impl Window {
     /// - **iOS / Android / Web:** Always returns an [`ExternalError::NotSupported`].
     #[inline]
     pub fn drag_window(&self) -> Result<(), ExternalError> {
-        let _span = tracing::debug_span!("winit::Window::drag_window",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::drag_window",).entered();
         self.window.maybe_wait_on_main(|w| w.drag_window())
     }
 
@@ -1600,7 +1600,7 @@ impl Window {
     #[inline]
     pub fn drag_resize_window(&self, direction: ResizeDirection) -> Result<(), ExternalError> {
         let _span = tracing::debug_span!(
-            "winit::Window::drag_resize_window",
+            "slint-modal-winit::Window::drag_resize_window",
             direction = ?direction
         )
         .entered();
@@ -1619,7 +1619,7 @@ impl Window {
     pub fn show_window_menu(&self, position: impl Into<Position>) {
         let position = position.into();
         let _span = tracing::debug_span!(
-            "winit::Window::show_window_menu",
+            "slint-modal-winit::Window::show_window_menu",
             position = ?position
         )
         .entered();
@@ -1637,7 +1637,7 @@ impl Window {
     /// - **iOS / Android / Web / Orbital:** Always returns an [`ExternalError::NotSupported`].
     #[inline]
     pub fn set_cursor_hittest(&self, hittest: bool) -> Result<(), ExternalError> {
-        let _span = tracing::debug_span!("winit::Window::set_cursor_hittest", hittest).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::set_cursor_hittest", hittest).entered();
         self.window.maybe_wait_on_main(|w| w.set_cursor_hittest(hittest))
     }
 }
@@ -1649,7 +1649,7 @@ impl Window {
     /// Returns `None` if current monitor can't be detected.
     #[inline]
     pub fn current_monitor(&self) -> Option<MonitorHandle> {
-        let _span = tracing::debug_span!("winit::Window::current_monitor",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::current_monitor",).entered();
         self.window.maybe_wait_on_main(|w| w.current_monitor().map(|inner| MonitorHandle { inner }))
     }
 
@@ -1661,7 +1661,7 @@ impl Window {
     /// [`ActiveEventLoop::available_monitors`]: crate::event_loop::ActiveEventLoop::available_monitors
     #[inline]
     pub fn available_monitors(&self) -> impl Iterator<Item = MonitorHandle> {
-        let _span = tracing::debug_span!("winit::Window::available_monitors",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::available_monitors",).entered();
         self.window.maybe_wait_on_main(|w| {
             w.available_monitors().into_iter().map(|inner| MonitorHandle { inner })
         })
@@ -1680,7 +1680,7 @@ impl Window {
     /// [`ActiveEventLoop::primary_monitor`]: crate::event_loop::ActiveEventLoop::primary_monitor
     #[inline]
     pub fn primary_monitor(&self) -> Option<MonitorHandle> {
-        let _span = tracing::debug_span!("winit::Window::primary_monitor",).entered();
+        let _span = tracing::debug_span!("slint-modal-winit::Window::primary_monitor",).entered();
         self.window.maybe_wait_on_main(|w| w.primary_monitor().map(|inner| MonitorHandle { inner }))
     }
 }

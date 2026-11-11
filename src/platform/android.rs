@@ -29,7 +29,7 @@
 //!
 //! The recommended way to avoid a conflict with the glue version is to avoid explicitly
 //! depending on the `android-activity` crate, and instead consume the API that
-//! is re-exported by Winit under `winit::platform::android::activity::*`
+//! is re-exported by Winit under `slint-modal-winit::platform::android::activity::*`
 //!
 //! Running on an Android device needs a dynamic system library. Add this to Cargo.toml:
 //!
@@ -165,7 +165,7 @@ impl<T> EventLoopBuilderExtAndroid for EventLoopBuilder<T> {
 /// their `android_main(app: AndroidApp)` function like:
 /// ```rust
 /// #[cfg(target_os = "android")]
-/// use winit::platform::android::activity::AndroidApp;
+/// use slint-modal-winit::platform::android::activity::AndroidApp;
 /// ```
 pub mod activity {
     // We enable the `"native-activity"` feature just so that we can build the

@@ -3,11 +3,11 @@
 fn main() -> Result<(), impl std::error::Error> {
     use std::collections::HashMap;
 
-    use winit::dpi::{LogicalPosition, LogicalSize, Position};
-    use winit::event::{ElementState, Event, KeyEvent, WindowEvent};
-    use winit::event_loop::{ActiveEventLoop, EventLoop};
-    use winit::raw_window_handle::HasRawWindowHandle;
-    use winit::window::Window;
+    use slint-modal-winit::dpi::{LogicalPosition, LogicalSize, Position};
+    use slint-modal-winit::event::{ElementState, Event, KeyEvent, WindowEvent};
+    use slint-modal-winit::event_loop::{ActiveEventLoop, EventLoop};
+    use slint-modal-winit::raw_window_handle::HasRawWindowHandle;
+    use slint-modal-winit::window::Window;
 
     #[path = "util/fill.rs"]
     mod fill;

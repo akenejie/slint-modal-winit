@@ -6,7 +6,7 @@
 //! the [`EventLoop::new()`] function.
 //!
 //! ```no_run
-//! use winit::event_loop::EventLoop;
+//! use slint-modal-winit::event_loop::EventLoop;
 //!
 //! # // Intentionally use `fn main` for clarity
 //! fn main() {
@@ -47,10 +47,10 @@
 //!
 //!
 //! ```no_run
-//! use winit::application::ApplicationHandler;
-//! use winit::event::WindowEvent;
-//! use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
-//! use winit::window::{Window, WindowId};
+//! use slint-modal-winit::application::ApplicationHandler;
+//! use slint-modal-winit::event::WindowEvent;
+//! use slint-modal-winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+//! use slint-modal-winit::window::{Window, WindowId};
 //!
 //! #[derive(Default)]
 //! struct App {

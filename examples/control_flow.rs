@@ -8,11 +8,11 @@ use ::tracing::{info, warn};
 #[cfg(web_platform)]
 use web_time as time;
 
-use winit::application::ApplicationHandler;
-use winit::event::{ElementState, KeyEvent, StartCause, WindowEvent};
-use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
-use winit::keyboard::{Key, NamedKey};
-use winit::window::{Window, WindowId};
+use slint-modal-winit::application::ApplicationHandler;
+use slint-modal-winit::event::{ElementState, KeyEvent, StartCause, WindowEvent};
+use slint-modal-winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use slint-modal-winit::keyboard::{Key, NamedKey};
+use slint-modal-winit::window::{Window, WindowId};
 
 #[path = "util/fill.rs"]
 mod fill;

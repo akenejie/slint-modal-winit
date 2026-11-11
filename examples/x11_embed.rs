@@ -3,11 +3,11 @@ use std::error::Error;
 
 #[cfg(x11_platform)]
 fn main() -> Result<(), Box<dyn Error>> {
-    use winit::application::ApplicationHandler;
-    use winit::event::WindowEvent;
-    use winit::event_loop::{ActiveEventLoop, EventLoop};
-    use winit::platform::x11::WindowAttributesExtX11;
-    use winit::window::{Window, WindowId};
+    use slint-modal-winit::application::ApplicationHandler;
+    use slint-modal-winit::event::WindowEvent;
+    use slint-modal-winit::event_loop::{ActiveEventLoop, EventLoop};
+    use slint-modal-winit::platform::x11::WindowAttributesExtX11;
+    use slint-modal-winit::window::{Window, WindowId};
 
     #[path = "util/fill.rs"]
     mod fill;
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         fn resumed(&mut self, event_loop: &ActiveEventLoop) {
             let window_attributes = Window::default_attributes()
                 .with_title("An embedded window!")
-                .with_inner_size(winit::dpi::LogicalSize::new(128.0, 128.0))
+                .with_inner_size(slint-modal-winit::dpi::LogicalSize::new(128.0, 128.0))
                 .with_embed_parent_window(self.parent_window_id);
 
             self.window = Some(event_loop.create_window(window_attributes).unwrap());

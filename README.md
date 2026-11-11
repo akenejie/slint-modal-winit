@@ -67,4 +67,4 @@ same MSRV policy.
 
 ### Platform-specific usage
 
-Check out the [`winit::platform`](https://rust-windowing.github.io/winit/winit/platform/index.html) module for platform-specific usage.
+Check out the [`slint-modal-winit::platform`](https://rust-windowing.github.io/winit/winit/platform/index.html) module for platform-specific usage.

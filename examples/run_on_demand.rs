@@ -5,11 +5,11 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use std::time::Duration;
 
-    use winit::application::ApplicationHandler;
-    use winit::event::WindowEvent;
-    use winit::event_loop::{ActiveEventLoop, EventLoop};
-    use winit::platform::run_on_demand::EventLoopExtRunOnDemand;
-    use winit::window::{Window, WindowId};
+    use slint-modal-winit::application::ApplicationHandler;
+    use slint-modal-winit::event::WindowEvent;
+    use slint-modal-winit::event_loop::{ActiveEventLoop, EventLoop};
+    use slint-modal-winit::platform::run_on_demand::EventLoopExtRunOnDemand;
+    use slint-modal-winit::window::{Window, WindowId};
 
     #[path = "util/fill.rs"]
     mod fill;
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         fn resumed(&mut self, event_loop: &ActiveEventLoop) {
             let window_attributes = Window::default_attributes()
                 .with_title("Fantastic window number one!")
-                .with_inner_size(winit::dpi::LogicalSize::new(128.0, 128.0));
+                .with_inner_size(slint-modal-winit::dpi::LogicalSize::new(128.0, 128.0));
             let window = event_loop.create_window(window_attributes).unwrap();
             self.window_id = Some(window.id());
             self.window = Some(window);

@@ -15,24 +15,24 @@ use rwh_06::{DisplayHandle, HasDisplayHandle};
 #[cfg(not(any(android_platform, ios_platform)))]
 use softbuffer::{Context, Surface};
 
-use winit::application::ApplicationHandler;
-use winit::dpi::{LogicalSize, PhysicalPosition, PhysicalSize};
-use winit::event::{DeviceEvent, DeviceId, Ime, MouseButton, MouseScrollDelta, WindowEvent};
-use winit::event_loop::{ActiveEventLoop, EventLoop};
-use winit::keyboard::{Key, ModifiersState};
-use winit::window::{
+use slint-modal-winit::application::ApplicationHandler;
+use slint-modal-winit::dpi::{LogicalSize, PhysicalPosition, PhysicalSize};
+use slint-modal-winit::event::{DeviceEvent, DeviceId, Ime, MouseButton, MouseScrollDelta, WindowEvent};
+use slint-modal-winit::event_loop::{ActiveEventLoop, EventLoop};
+use slint-modal-winit::keyboard::{Key, ModifiersState};
+use slint-modal-winit::window::{
     Cursor, CursorGrabMode, CustomCursor, CustomCursorSource, Fullscreen, Icon, ResizeDirection,
     Theme, Window, WindowId,
 };
 
 #[cfg(macos_platform)]
-use winit::platform::macos::{OptionAsAlt, WindowAttributesExtMacOS, WindowExtMacOS};
+use slint-modal-winit::platform::macos::{OptionAsAlt, WindowAttributesExtMacOS, WindowExtMacOS};
 #[cfg(any(x11_platform, wayland_platform))]
-use winit::platform::startup_notify::{
+use slint-modal-winit::platform::startup_notify::{
     self, EventLoopExtStartupNotify, WindowAttributesExtStartupNotify, WindowExtStartupNotify,
 };
 #[cfg(x11_platform)]
-use winit::platform::x11::WindowAttributesExtX11;
+use slint-modal-winit::platform::x11::WindowAttributesExtX11;
 
 #[path = "util/tracing.rs"]
 mod tracing;
@@ -171,7 +171,7 @@ impl Application {
 
         #[cfg(web_platform)]
         {
-            use winit::platform::web::WindowAttributesExtWebSys;
+            use slint-modal-winit::platform::web::WindowAttributesExtWebSys;
             window_attributes = window_attributes.with_append(true);
         }
 
@@ -179,7 +179,7 @@ impl Application {
 
         #[cfg(ios_platform)]
         {
-            use winit::platform::ios::WindowExtIOS;
+            use slint-modal-winit::platform::ios::WindowExtIOS;
             window.recognize_doubletap_gesture(true);
             window.recognize_pinch_gesture(true);
             window.recognize_rotation_gesture(true);
@@ -735,7 +735,7 @@ impl WindowState {
         custom_cursors: &[CustomCursor],
     ) {
         use std::time::Duration;
-        use winit::platform::web::CustomCursorExtWebSys;
+        use slint-modal-winit::platform::web::CustomCursorExtWebSys;
 
         let cursors = vec![
             custom_cursors[0].clone(),
@@ -974,7 +974,7 @@ fn decode_cursor(bytes: &[u8]) -> CustomCursorSource {
 fn url_custom_cursor() -> CustomCursorSource {
     use std::sync::atomic::{AtomicU64, Ordering};
 
-    use winit::platform::web::CustomCursorExtWebSys;
+    use slint-modal-winit::platform::web::CustomCursorExtWebSys;
 
     static URL_COUNTER: AtomicU64 = AtomicU64::new(0);
 

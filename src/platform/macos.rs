@@ -36,7 +36,7 @@
 //! use objc2::{declare_class, msg_send_id, mutability, ClassType, DeclaredClass};
 //! use objc2_app_kit::{NSApplication, NSApplicationDelegate};
 //! use objc2_foundation::{NSArray, NSURL, MainThreadMarker, NSObject, NSObjectProtocol};
-//! use winit::event_loop::EventLoop;
+//! use slint-modal-winit::event_loop::EventLoop;
 //!
 //! declare_class!(
 //!     struct AppDelegate;
@@ -393,9 +393,9 @@ pub trait EventLoopBuilderExtMacOS {
     /// Set the activation policy to "accessory".
     ///
     /// ```
-    /// use winit::event_loop::EventLoopBuilder;
+    /// use slint-modal-winit::event_loop::EventLoopBuilder;
     /// #[cfg(target_os = "macos")]
-    /// use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
+    /// use slint-modal-winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
     ///
     /// let mut builder = EventLoopBuilder::new();
     /// #[cfg(target_os = "macos")]
@@ -415,9 +415,9 @@ pub trait EventLoopBuilderExtMacOS {
     /// Disable creating a default menubar.
     ///
     /// ```
-    /// use winit::event_loop::EventLoopBuilder;
+    /// use slint-modal-winit::event_loop::EventLoopBuilder;
     /// #[cfg(target_os = "macos")]
-    /// use winit::platform::macos::EventLoopBuilderExtMacOS;
+    /// use slint-modal-winit::platform::macos::EventLoopBuilderExtMacOS;
     ///
     /// let mut builder = EventLoopBuilder::new();
     /// #[cfg(target_os = "macos")]

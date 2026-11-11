@@ -7,11 +7,11 @@ fn main() -> std::process::ExitCode {
     use std::thread::sleep;
     use std::time::Duration;
 
-    use winit::application::ApplicationHandler;
-    use winit::event::WindowEvent;
-    use winit::event_loop::{ActiveEventLoop, EventLoop};
-    use winit::platform::pump_events::{EventLoopExtPumpEvents, PumpStatus};
-    use winit::window::{Window, WindowId};
+    use slint-modal-winit::application::ApplicationHandler;
+    use slint-modal-winit::event::WindowEvent;
+    use slint-modal-winit::event_loop::{ActiveEventLoop, EventLoop};
+    use slint-modal-winit::platform::pump_events::{EventLoopExtPumpEvents, PumpStatus};
+    use slint-modal-winit::window::{Window, WindowId};
 
     #[path = "util/fill.rs"]
     mod fill;
