@@ -1,9 +1,10 @@
 [package]
-name = "winit"
+name = "slint-modal-winit"
 version = "0.30.13"
 authors = [
     "The winit contributors",
     "Pierre Krieger <pierre.krieger1708@gmail.com>",
+    "akenejie <akenejie@users.noreply.github.com>",
 ]
 description = "Cross-platform window creation library."
 keywords = ["windowing"]
@@ -372,7 +373,7 @@ members = ["dpi"]
 
 [workspace.package]
 rust-version = "1.70.0"
-repository = "https://github.com/rust-windowing/winit"
+repository = "https://github.com/akenejie/slint-modal-winit"
 license = "Apache-2.0"
 edition = "2021"
 
